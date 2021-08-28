@@ -1,0 +1,36 @@
+.grid-container {
+    display: grid;
+    grid-template-areas: 'header header' '_menu main' 'footer footer';
+    grid-gap: 3px;
+    background-color: lightgray;
+    /* padding: 3px; */
+    grid-template-columns: 15% 85%;
+    grid-template-rows: min-content auto min-content;
+    height: 97vh;
+    /* width: 100%; */
+}
+
+.grid-container>div {
+    background-color: white;
+    text-align: upper-left;
+    /* padding: 5px 5px; */
+}
+
+.item-header {
+    grid-area: header;
+}
+
+.item-menu {
+    grid-area: _menu;
+}
+
+.item-main {
+    grid-area: main;
+    overflow-x: hidden;
+}
+
+.item-footer {
+    grid-area: footer;
+    font-size: 10pt;
+}
+

@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat&family=Roboto&display=swap');
+
+:root {
+    -c-maincolor: darkyan;
+}
+
+* {
+    font-family:  'Roboto', sans-serif;
+    /* font-family: 'Caveat', cursive; */
+}
+
+div, input[type=button] {
+    background-color: darkyan;
+    color: white;
+    border-radius: 2px;
+}
