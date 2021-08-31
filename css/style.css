@@ -1,16 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 :root {
-    -c-maincolor: darkyan;
+/*	colors*/
+	--main-color-elements: #009999;
+	--main-bg-color-all: white;
+	
+/*	texts*/
+	--main-text-color-dark: black;
+	--main-text-color-light: white;
+
+/*	miscelaneous*/
+	--border-radius: 2px;
 }
 
 * {
-    font-family:  'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif;
+	font-size: 12pt;
     /* font-family: 'Caveat', cursive; */
 }
 
-div, input[type=button] {
-    background-color: darkyan;
-    color: white;
-    border-radius: 2px;
+div {
+    background-color: var(--main-color-elements);
+    color: var(--main-text-color-light);
+    border-radius: var(--border-radius);
+}
+
+div.container {
+	background-color: var(--main-bg-color-all);
+	color: var(--main-text-color-dark);
 }

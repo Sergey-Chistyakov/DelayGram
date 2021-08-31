@@ -8,11 +8,7 @@
 }
 
 .flex-container>div {
-    /* background-color: #f1f1f1; */
-    flex: 0 0 575px;
+    flex: 0 0 28.8%;
     margin: 10px;
-    /* margin-right: 30px; */
     padding: 20px;
-    /* font-size: 30px; */
-    
 }

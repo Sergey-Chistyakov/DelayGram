@@ -1,3 +1,31 @@
 input[type=button] {
+	background: var(--main-color-elements);
+	color: var(--main-text-color-light);
+	border: none;
+	border-radius: var(--border-radius);
+}
 
+input[type=button].large {
+    margin: 10px;
+    padding: 20px;
+}
+
+input[type=button].close {
+    font-family: 'Material Icons';
+    color: gray;
+    font-size: 32px;
+    font-weight: bold;
+    background: var(--main-bg-color-all);
+}
+
+input[type=button].close:hover,
+input[type=button].close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+input[type=text] {
+	border: 2px solid var(--main-color-elements);
+	border-radius: var(--border-radius);
 }

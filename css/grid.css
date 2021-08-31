@@ -1,18 +1,18 @@
 .grid-container {
     display: grid;
     grid-template-areas: 'header header' '_menu main' 'footer footer';
-    grid-gap: 3px;
+/*    grid-gap: 3px;*/
     background-color: lightgray;
     /* padding: 3px; */
     grid-template-columns: 15% 85%;
     grid-template-rows: min-content auto min-content;
-    height: 97vh;
+    min-height: 97vh;
     /* width: 100%; */
 }
 
 .grid-container>div {
     background-color: white;
-    text-align: upper-left;
+    text-align: left;
     /* padding: 5px 5px; */
 }
 
