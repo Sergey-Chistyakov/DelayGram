@@ -31,7 +31,7 @@ function establishQuery(query) {
 }
 
 (async ()=> {
-    let response = await fetch(establishQuery('Finland landscape'));
+    let response = await fetch(establishQuery('western desert'));
     if (response.ok) {
         let json = await response.json();
         let divForImg = document.getElementById('pic-container-modal');
@@ -39,7 +39,10 @@ function establishQuery(query) {
         for(let i = 0; i<9; i++) {
             let div = document.createElement('div');
             div.style.height = '200px';
+            div.style.width = '200px';
             div.style.backgroundImage = `url(${json.items[i].link})`;
+            div.style.display = 'inline-block';
+            div.style.backgroundSize = 'cover';
             divForImg.appendChild(div);
         }
     } else {
