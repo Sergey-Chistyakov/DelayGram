@@ -10,6 +10,7 @@ const CSE = 'e8e4c105a7c6c1f01';
 
 let queryParameters = {
     cx: CSE,
+    //safe: "active",
     imgSize: "LARGE",
     imgType: "photo",
     q: "",
@@ -37,6 +38,8 @@ function establishQuery(query) {
         let divForImg = document.getElementById('pic-container-modal');
 
         for(let i = 0; i<9; i++) {
+            // let resp = await fetch(`${json.items[i].link}`);
+            // if (!resp.ok) continue;
             let div = document.createElement('div');
             div.style.height = '200px';
             div.style.width = '200px';
