@@ -2,54 +2,132 @@
 
 const API_KEY = 'AIzaSyBs3BcTa5D_otlqYjNkGud9Lwp1ktTb5qE';
 const CSE = 'e8e4c105a7c6c1f01';
+const SEARCH_HTTP = 'https://customsearch.googleapis.com/customsearch/v1?';
+
+// let queryParameters = {
+//     cx: CSE,
+//     safe: "active",         // Filter: no porn, violence etc
+//     filter: "1",            // no Duplicate results filter
+//     num: 10,                // Quantity of results from 1 to 10 only (((
+//     imgSize: "LARGE",
+//     imgType: "photo",
+//     q: "",                  // Placeholder for query
+//     searchType: "image",
+//     key: API_KEY,
+//     start: 0,               // Start result for query in
+// };
+
+let imageMap = new Map(); // Cache for images
+let queryMap = new Map(); // Cache for queries
+
+//------------------------------------------------------------------------------------------
+class WebQueryProvider {
+    #lastSearch = new Date(0);
+    #searchHttp = '';
+    #runs = false;
+    results = [];
+
+    #options = {
+        cx: CSE,
+        key: API_KEY,
+        start: 0,               // Start result for query in
+        num: 10,                // Quantity of results from 1 to 10 only (((
+        q: "",                  // Placeholder for query
+        safe: "active",         // Filter: no porn, violence etc
+        filter: "1",            // "no Duplicate results" filter
+        searchType: "image",
+        imgType: "photo",
+        imgSize: "LARGE",
+    }
+
+    set resultsQuantity(value) {
+        if (!!value || isNaN(value)) this.#options.num = value;
+        return this;
+    }
+
+    set startResultsNumber(value) {
+        if (!!value || isNaN(value)) this.#options.start = value;
+        return this;
+    }
+
+    constructor(query, start = 0, resultsQuantity = 10) {
+        if (!query || query.replace(/\s/ig, '').length < 3) {
+            alert('Search query must be more or three symbols!');
+            return null;
+        }
+
+        this.#options.q = query;
+        this.#options.start = (isNaN(start) || !!start) ? 0 : start;
+        this.#options.num = (isNaN(resultsQuantity) || !!resultsQuantity) ? 10 : resultsQuantity;
+    }
 
 
-// 'GET https://customsearch.googleapis.com/customsearch/v1?cx=e8e4c105a7c6c1f01&imgSize=LARGE&imgType=photo&q=human&searchType=image&key=[YOUR_API_KEY] HTTP/1.1\n' +
-// '\n' +
-// 'Accept: application/json\n'
+    async commit() {
+        if (this.#runs || (new Date() - this.#lastSearch < 120000)) return;
+        try {
+            this.#establishQuery();
+            this.#runs = true;
+            let response = await fetch(this.#searchHttp);
+            if (response.ok) {
+                let json = await response.json();
+                for (let responseItem of json.items) {
+                    this.results.push(responseItem.link);
+                }
+                this.#lastSearch = new Date();
+            } else {
+                throw new Error("Ошибка HTTP: " + response.status);
+            }
+        } catch (e) {
+            alert(e);
+        } finally {
+            this.#runs = false;
+            return this;
+        }
+    }
 
-let queryParameters = {
-    cx: CSE,
-    //safe: "active",
-    imgSize: "LARGE",
-    imgType: "photo",
-    q: "",
-    searchType: "image",
-    key: API_KEY,
-};
+    #establishQuery() {
+        this.#searchHttp = SEARCH_HTTP;
+        for (let [key, value] of Object.entries(this.#options)) {
+            this.#searchHttp += key + '=' + ((key == 'q') ? value.trim().replace(/\s/ig, '+') : value) + '&';
+        }
+        this.#searchHttp = this.#searchHttp.slice(0, -1);
+    }
+}
 
-function establishQuery(query) {
-    if (!query || query.replace(/\s/ig, '').length < 3) {
-        alert('Search query must be more or three symbols!');
+//------------------------------------------------------------------------------------------
+class ImageExtended extends Image {
+    setSRC(srcToSet) {
+        this.src = srcToSet;
+        return this;
+    }
+}
+
+//------------------------------------------------------------------------------------------
+(async () => {
+    let query = 'French fries';
+    query = query.trim();
+    if (!queryMap.has(query)) queryMap.set(query, new WebQueryProvider(query));
+    let queryToDo = queryMap.get(query);
+    await queryToDo.commit();
+    let results = queryToDo.results;
+
+    if (results.length == 0) {
+        alert('empty response');
         return;
     }
 
-    let result = 'https://customsearch.googleapis.com/customsearch/v1?';
-    for (let [key, value] of Object.entries(queryParameters)) {
-        result += key + '=' + ((key == 'q') ? query.trim().replace(/\s/ig, '+') : value) + '&';
-    }
-    return result.slice(0, -1);
-}
+    let imgGridContainer = document.getElementById('pic-container-modal');
 
-(async ()=> {
-    let response = await fetch(establishQuery('western desert'));
-    if (response.ok) {
-        let json = await response.json();
-        let divForImg = document.getElementById('pic-container-modal');
-
-        for(let i = 0; i<9; i++) {
-            // let resp = await fetch(`${json.items[i].link}`);
-            // if (!resp.ok) continue;
-            let div = document.createElement('div');
-            div.style.height = '200px';
-            div.style.width = '200px';
-            div.style.backgroundImage = `url(${json.items[i].link})`;
-            div.style.display = 'inline-block';
-            div.style.backgroundSize = 'cover';
-            divForImg.appendChild(div);
-        }
-    } else {
-        alert("Ошибка HTTP: " + response.status);
+    for (let imageUrl of results) {
+        let div = document.createElement('div');
+        div.style.height = '24vh';
+        div.appendChild((new ImageExtended()).setSRC(imageUrl));
+        imgGridContainer.appendChild(div);
     }
 })();
 
+//------------------------------------------------------------------------------------------
+function imgCashe(url) {
+    if (imageMap.has(url)) return imageMap.get(url);
+
+}
