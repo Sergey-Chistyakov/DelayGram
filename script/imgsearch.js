@@ -4,33 +4,38 @@ const API_KEY = 'AIzaSyBs3BcTa5D_otlqYjNkGud9Lwp1ktTb5qE';
 const CSE = 'e8e4c105a7c6c1f01';
 const SEARCH_HTTP = 'https://customsearch.googleapis.com/customsearch/v1?';
 
-// let queryParameters = {
-//     cx: CSE,
-//     safe: "active",         // Filter: no porn, violence etc
-//     filter: "1",            // no Duplicate results filter
-//     num: 10,                // Quantity of results from 1 to 10 only (((
-//     imgSize: "LARGE",
-//     imgType: "photo",
-//     q: "",                  // Placeholder for query
-//     searchType: "image",
-//     key: API_KEY,
-//     start: 0,               // Start result for query in
-// };
+//------------------------------------------------------------------------------------------
+class ImageExtended extends Image {
+    setSRC(srcToSet) {
+        this.src = srcToSet;
+        return this;
+    }
+}
 
-let imageMap = new Map(); // Cache for images
-let queryMap = new Map(); // Cache for queries
+class MapExtended extends Map {
+    getOrSet(value, TypeConstructor) {
+        if (!this.has(value)) this.set(value, new TypeConstructor(value));
+        return this.get(value);
+    }
+}
+
+//------------------------------------------------------------------------------------------
+let imageMap = new MapExtended(); // Cache for images
+let queryMap = new MapExtended(); // Cache for queries
 
 //------------------------------------------------------------------------------------------
 class WebQueryProvider {
     #lastSearch = new Date(0);
     #searchHttp = '';
     #runs = false;
+    #searchDelay = 120000;      // ms
+    #totalResults = 0;
     results = [];
 
     #options = {
         cx: CSE,
         key: API_KEY,
-        start: 0,               // Start result for query in
+        start: 1,               // Start result for query in
         num: 10,                // Quantity of results from 1 to 10 only (((
         q: "",                  // Placeholder for query
         safe: "active",         // Filter: no porn, violence etc
@@ -41,13 +46,21 @@ class WebQueryProvider {
     }
 
     set resultsQuantity(value) {
-        if (!!value || isNaN(value)) this.#options.num = value;
+        if (!value && !isNaN(value) && value <= 10 && value > 0) this.#options.num = value;
         return this;
     }
 
     set startResultsNumber(value) {
-        if (!!value || isNaN(value)) this.#options.start = value;
+        if (!value || !isNaN(value) && (this.#totalResults > 0) ? value <= this.#totalResults : true) this.#options.start = value;
         return this;
+    }
+
+    get #startResultsNumber() {
+        return this.#options.start;
+    }
+
+    get #canSearchFurther() {
+        return this.#totalResults >= this.#options.start;
     }
 
     constructor(query, start = 0, resultsQuantity = 10) {
@@ -63,7 +76,7 @@ class WebQueryProvider {
 
 
     async commit() {
-        if (this.#runs || (new Date() - this.#lastSearch < 120000)) return;
+        if (this.#runs || (Date.now() - this.#lastSearch < this.#searchDelay)) return;
         try {
             this.#establishQuery();
             this.#runs = true;
@@ -73,7 +86,12 @@ class WebQueryProvider {
                 for (let responseItem of json.items) {
                     this.results.push(responseItem.link);
                 }
-                this.#lastSearch = new Date();
+                this.#options.start = json.queries.nextPage[0].startIndex;
+                this.#totalResults = Number.parseInt(json.queries.nextPage[0].totalResults);
+                if (this.results.length == 0) {
+                    throw new Error('EmptyResponse');
+                }
+                this.#lastSearch = Date.now();
             } else {
                 throw new Error("Ошибка HTTP: " + response.status);
             }
@@ -81,7 +99,7 @@ class WebQueryProvider {
             alert(e);
         } finally {
             this.#runs = false;
-            return this;
+            alert(this.#totalResults);
         }
     }
 
@@ -94,27 +112,15 @@ class WebQueryProvider {
     }
 }
 
-//------------------------------------------------------------------------------------------
-class ImageExtended extends Image {
-    setSRC(srcToSet) {
-        this.src = srcToSet;
-        return this;
-    }
-}
 
 //------------------------------------------------------------------------------------------
+// TEST MAIN EXECUTIABLE FUNCTION
 (async () => {
-    let query = 'French fries';
-    query = query.trim();
-    if (!queryMap.has(query)) queryMap.set(query, new WebQueryProvider(query));
-    let queryToDo = queryMap.get(query);
+    let queryToDo = queryMap.getOrSet('Something you wil 34556666 no onde for ytou !!!', WebQueryProvider); // query goes here!!!!
+    // let results = await queryToDo.commit().results;
+    if (confirm('next?')) queryToDo.startResultsNumber = 11;
     await queryToDo.commit();
     let results = queryToDo.results;
-
-    if (results.length == 0) {
-        alert('empty response');
-        return;
-    }
 
     let imgGridContainer = document.getElementById('pic-container-modal');
 
@@ -127,7 +133,7 @@ class ImageExtended extends Image {
 })();
 
 //------------------------------------------------------------------------------------------
-function imgCashe(url) {
-    if (imageMap.has(url)) return imageMap.get(url);
+function imgCashe(urlArray) {
+
 
 }
