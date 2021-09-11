@@ -25,12 +25,13 @@
 .modal-grid-header {
     display: grid;
     background-color: var(--main-bg-color-all);
-	grid-template-columns: 75% auto 32px;
+	grid-template-columns: 1fr 1fr 1fr 1fr 32px;
+    gap: 10px 10px;
 }
 
 .modal-grid-images {
     display: grid;
-    margin: 10px 37px 0px 0px;
+    margin: 10px 39px 0px 0px;
     gap: 10px 10px;
     background-color: var(--main-bg-color-all);
     grid-template-columns: auto auto auto;
@@ -40,11 +41,13 @@
 .modal-grid-images>div {
     background-color: var(--main-bg-color-all);
     border: 1px solid var(--main-color-elements);
-    overflow: hidden;
+    overflow: no-content;
 }
+
 .modal-grid-images>div>image {
-    /*object-fit: cover;*/
-    max-width: 100%;
-    padding: 0px;
-    /*max-height: 100%;*/
+    border: 1px solid var(--main-color-elements);
+    /*object-fit: scale-down;*/
+    /*max-width: ;*/
+    /*padding: 0px;*/
+    max-height: 24vh;
 }

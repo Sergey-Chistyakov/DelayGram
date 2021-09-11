@@ -29,14 +29,16 @@ class WebQueryProvider {
     #searchHttp = '';
     #runs = false;
     #searchDelay = 120000;      // ms
-    #totalResults = 0;
-    results = [];
+    #totalResults = null;
+    #resultRequestImageUrls = [];
+    #shownImages = 0;
+    #resultImages = new Map();
 
     #options = {
         cx: CSE,
         key: API_KEY,
-        start: 1,               // Start result for query in
-        num: 10,                // Quantity of results from 1 to 10 only (((
+        start: 1,               // Start result for query in                    [!!! start + num must not be >100!!!!]
+        num: 10,                // Quantity of results from 1 to 10 only        [!!! start + num must not be >100!!!!]
         q: "",                  // Placeholder for query
         safe: "active",         // Filter: no porn, violence etc
         filter: "1",            // "no Duplicate results" filter
@@ -55,12 +57,20 @@ class WebQueryProvider {
         return this;
     }
 
-    get #startResultsNumber() {
-        return this.#options.start;
-    }
+    // get #startResultsNumber() {
+    //     return this.#options.start;
+    // }
 
     get #canSearchFurther() {
-        return this.#totalResults >= this.#options.start;
+        return this.#totalResults == null || (this.#totalResults >= this.#options.start  && this.#options.start + this.#options.num < 100);
+    }
+
+    get results() {
+        return this.#resultRequestImageUrls;
+    }
+
+    resultsNext (numOfResults) {
+
     }
 
     constructor(query, start = 0, resultsQuantity = 10) {
@@ -76,7 +86,7 @@ class WebQueryProvider {
 
 
     async commit() {
-        if (this.#runs || (Date.now() - this.#lastSearch < this.#searchDelay)) return;
+        if (this.#runs || !this.#canSearchFurther || (Date.now() - this.#lastSearch < this.#searchDelay)) return;
         try {
             this.#establishQuery();
             this.#runs = true;
@@ -84,22 +94,23 @@ class WebQueryProvider {
             if (response.ok) {
                 let json = await response.json();
                 for (let responseItem of json.items) {
-                    this.results.push(responseItem.link);
+                    this.#resultRequestImageUrls.push(responseItem.link);
                 }
-                this.#options.start = json.queries.nextPage[0].startIndex;
-                this.#totalResults = Number.parseInt(json.queries.nextPage[0].totalResults);
-                if (this.results.length == 0) {
+                if (this.#resultRequestImageUrls.length == 0) {
                     throw new Error('EmptyResponse');
+                }
+                if (json.queries.nextPage.length == 1) { // !!!!!!!!!!!!! check if property exists
+                    this.#options.start = json.queries.nextPage[0].startIndex;
+                    this.#totalResults = Number.parseInt(json.queries.nextPage[0].totalResults);
                 }
                 this.#lastSearch = Date.now();
             } else {
-                throw new Error("Ошибка HTTP: " + response.status);
+                throw new Error("Web search Error: " + response.status);
             }
         } catch (e) {
             alert(e);
         } finally {
             this.#runs = false;
-            alert(this.#totalResults);
         }
     }
 
@@ -114,11 +125,11 @@ class WebQueryProvider {
 
 
 //------------------------------------------------------------------------------------------
-// TEST MAIN EXECUTIABLE FUNCTION
+// TEST MAIN EXECUTABLE FUNCTION
 (async () => {
     let queryToDo = queryMap.getOrSet('Something you wil 34556666 no onde for ytou !!!', WebQueryProvider); // query goes here!!!!
     // let results = await queryToDo.commit().results;
-    if (confirm('next?')) queryToDo.startResultsNumber = 11;
+    // if (confirm('next?')) queryToDo.startResultsNumber = 11;
     await queryToDo.commit();
     let results = queryToDo.results;
 
