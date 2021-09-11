@@ -8,6 +8,7 @@ const SEARCH_HTTP = 'https://customsearch.googleapis.com/customsearch/v1?';
 class ImageExtended extends Image {
     setSRC(srcToSet) {
         this.src = srcToSet;
+        this.alt = '';
         return this;
     }
 }
@@ -57,19 +58,15 @@ class WebQueryProvider {
         return this;
     }
 
-    // get #startResultsNumber() {
-    //     return this.#options.start;
-    // }
-
     get #canSearchFurther() {
-        return this.#totalResults == null || (this.#totalResults >= this.#options.start  && this.#options.start + this.#options.num < 100);
+        return this.#totalResults == null || (this.#totalResults >= this.#options.start && this.#options.start + this.#options.num < 100);
     }
 
     get results() {
         return this.#resultRequestImageUrls;
     }
 
-    resultsNext (numOfResults) {
+    resultsNext(numOfResults) {
 
     }
 
@@ -124,27 +121,95 @@ class WebQueryProvider {
 }
 
 
+//-TEST MAIN EXECUTABLE FUNCTION------------------------------------------------------------
+
+// (async () => {
+//     let queryToDo = queryMap.getOrSet('Sun and moon', WebQueryProvider); // query goes here!!!!
+//     await queryToDo.commit();
+//     let results = queryToDo.results;
+//
+//     let imgGridContainer = document.getElementById('pic-container-modal');
+//
+//     for (let imageUrl of results.slice(0,9)) {
+//         let div = document.createElement('div');
+//         imgGridContainer.appendChild(div);
+//         div.appendChild((new ImageExtended()).setSRC(imageUrl));
+//         addControls(div, 'first');
+//
+//     }
+// })();
+
+let results = [
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Supermoon_Nov-14-2016-minneapolis.jpg/1200px-Supermoon_Nov-14-2016-minneapolis.jpg',
+    'https://phantom-marca.unidadeditorial.es/d3c076d28d2768328f83c297d722ddcb/crop/268x219/1257x776/f/jpg/assets/multimedia/imagenes/2021/07/23/16270444581760.jpg',
+    'https://www.refinery29.com/images/10279335.jpg',
+    'https://upload.wikimedia.org/wikipedia/ru/a/ad/Heartbreak_on_a_Full_Moon.jpg',
+    'https://cdn1.ozone.ru/s3/multimedia-z/c1200/6058507955.jpg',
+    'https://c.tadst.com/gfx/600x337/full-moon-phase.png?1',
+    'https://www.popsci.com/uploads/2021/07/22/full-moon-griffin-wooldridge.jpg',
+    'https://www.thelist.com/img/gallery/heres-what-the-new-moon-on-march-13-means-for-your-zodiac-sign/l-intro-1615565866.jpg',
+    'https://www.boltonvalley.com/wp-content/uploads/2021/06/buck-moon.jpg',
+];
+let imgGridContainer = document.getElementById('pic-container-modal');
+let i = 0;
+for (let imageUrl of results.slice(0, 9)) {
+    let div = document.createElement('div');
+    imgGridContainer.appendChild(div);
+    div.appendChild((new ImageExtended()).setSRC(imageUrl));
+    addControls(div, (i++).toString());
+}
+
 //------------------------------------------------------------------------------------------
-// TEST MAIN EXECUTABLE FUNCTION
-(async () => {
-    let queryToDo = queryMap.getOrSet('Something you wil 34556666 no onde for ytou !!!', WebQueryProvider); // query goes here!!!!
-    // let results = await queryToDo.commit().results;
-    // if (confirm('next?')) queryToDo.startResultsNumber = 11;
-    await queryToDo.commit();
-    let results = queryToDo.results;
+// todo replace true-false with error handling
 
-    let imgGridContainer = document.getElementById('pic-container-modal');
+function addControls(div, idToSet = null, imgToSet = null) {
+    if (idToSet == null && div.id == undefined) return false;
+    if (idToSet == null) idToSet = div.id;
 
-    for (let imageUrl of results) {
-        let div = document.createElement('div');
-        div.style.height = '24vh';
-        div.appendChild((new ImageExtended()).setSRC(imageUrl));
-        imgGridContainer.appendChild(div);
-    }
-})();
+    // Add mask for selected elements
+    let divSelectionMark = document.createElement('div');
+    divSelectionMark.className = 'selected';
+    divSelectionMark.innerHTML = '&#xE92D';
+    divSelectionMark.style.display = 'none';
+    divSelectionMark.id = idToSet + '-selectionMark';
+    // div.addEventListener('click', ()=>{
+    //     divSelectionMark.style.display = (divSelectionMark.style.display == 'none') ? 'block' : 'none';
+    // });
+    div.appendChild(divSelectionMark);
 
-//------------------------------------------------------------------------------------------
-function imgCashe(urlArray) {
+    // Add popup menu for selection and preview
+    //mouseover mouseout
+    //todo preview lighthouse of some kind
+    let divPreview = document.createElement('div');
+    divPreview.className = 'popup popup-top';
+    divPreview.innerHTML = '&#xe8ff';
+    divPreview.style.opacity = '0';
+    div.appendChild(divPreview);
 
+    let divSelect = document.createElement('div');
+    divSelect.className = 'popup popup-bottom';
+    divSelect.innerHTML = '&#xe876';
+    divSelect.style.opacity = '0';
+    divSelect.addEventListener('click', () => {
+        if (divSelectionMark.style.display == 'none') {
+            divSelectionMark.style.display = 'block';
+            divSelect.innerHTML = '&#xe5cd';
+        } else {
+            divSelectionMark.style.display = 'none';
+            divSelect.innerHTML = '&#xe876';
+        }
+    });
+    div.appendChild(divSelect);
 
+    div.addEventListener('mouseover', () => {
+        divPreview.style.opacity = '0.8';
+        divSelect.style.opacity = '0.8';
+    });
+
+    div.addEventListener('mouseout', () => {
+        divPreview.style.opacity = '0';
+        divSelect.style.opacity = '0';
+    });
+
+    return true;
 }

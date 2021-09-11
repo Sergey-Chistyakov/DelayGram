@@ -1,8 +1,15 @@
 input[type=button] {
-	background: var(--main-color-elements);
+	background: var(--main-color-element);
 	color: var(--main-text-color-light);
 	border: none;
 	border-radius: var(--border-radius);
+    height: 34px;
+}
+
+input[type=button]:hover,
+input[type=button]:focus {
+    background: var(--main-color-elemenst-alt1);
+    cursor: pointer;
 }
 
 input[type=button].large {
@@ -26,6 +33,6 @@ input[type=button].close:focus {
 }
 
 input[type=text] {
-	border: 2px solid var(--main-color-elements);
+	border: 2px solid var(--main-color-element);
 	border-radius: var(--border-radius);
 }

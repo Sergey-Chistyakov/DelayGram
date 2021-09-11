@@ -3,14 +3,16 @@
 
 :root {
 /*	colors*/
-	--main-color-elements: #009999;
 	--main-bg-color-all: white;
-	
+	--main-color-element: #009999;
+	--main-color-elemenst-alt1: #6d2b5c;
+	--main-color-elemenst-alt2: #8c94ac;
+
 /*	texts*/
 	--main-text-color-dark: black;
 	--main-text-color-light: white;
 
-/*	miscelaneous*/
+/*	miscellaneous*/
 	--border-radius: 2px;
 }
 
@@ -21,7 +23,7 @@
 }
 
 div {
-    background-color: var(--main-color-elements);
+    background-color: var(--main-color-element);
     color: var(--main-text-color-light);
     border-radius: var(--border-radius);
 }
