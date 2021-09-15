@@ -26,7 +26,7 @@
 .modal-grid-header {
     display: grid;
     background-color: var(--main-bg-color-all);
-    grid-template-columns: 1fr 1fr 1fr 1fr 32px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 32px;
     gap: 10px 10px;
 }
 
@@ -54,35 +54,39 @@
     position: absolute;
     top: 0;
     left: 0;
-    opacity: 0.5;
+    /*opacity: 0.5;*/
     z-index: 2;
     align-content: center;
-    cursor: pointer;
+    /*cursor: pointer;*/
+    transition: opacity 0.75s;
+    user-select: none;
 }
 
 .modal-grid-images > div div.popup {
     font-family: 'Material Icons';
     font-size: 9vh;
-    width: 40%;
+    /*width: 40%;*/
     height: 40%;
     position: absolute;
     /*opacity: 0.8;*/
     z-index: 3;
-    align-content: center;
+    /*align-content: center;*/
     cursor: pointer;
     background: var(--main-color-elemenst-alt2);
     user-select: none;
-    transition: opacity 1s;
+    transition: opacity 0.75s, width 0.5s;
 }
 
 .modal-grid-images > div div.popup-top {
     top: 0;
     left: 0;
+    text-align: end;
 }
 
 .modal-grid-images > div div.popup-bottom {
     bottom: 0px;
     right: 0px;
+    text-align: start;
 }
 
 .modal-grid-images > div img {
@@ -93,3 +97,4 @@
     transform: translate(-50%, -50%);
     -webkit-user-drag: none;
 }
+

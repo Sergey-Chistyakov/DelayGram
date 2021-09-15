@@ -34,5 +34,10 @@ input[type=button].close:focus {
 
 input[type=text] {
 	border: 2px solid var(--main-color-element);
-	border-radius: var(--border-radius);
+    border-radius: var(--border-radius);
+}
+
+input[type=text]:focus {
+    outline: none;
+    border-color: var(--main-color-elemenst-alt1);
 }

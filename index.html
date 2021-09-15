@@ -27,14 +27,17 @@
 <div id="modal" class="modal-container">
     <div class="modal-content">
         <div class="modal-grid-header">
-            <input type="text" id="query" style="display: inline-block; grid-column: 1 / span 3;">
+            <input type="text" id="query"
+                   style="display: inline-block; grid-column: 1 / span 4;">
             <input type="button" id="query-search" class="small" value="Search"
-                   style="display: inline-block;">
+                   style="display: inline-block; grid-column: 5 / span 2;">
             <input type="button" class="close" id="buttonCloseModal" value="&#xE5CD">
             <input type="button" id="previous-images-page" class="small" value="Previous"
                    style="display: inline-block; grid-column: 1 / span 2;">
-            <input type="button" id="next-images-page" class="small" value="Next"
+            <input type="button" id="selected-images-confirm" class="small" value="Confirm selected"
                    style="display: inline-block; grid-column: 3 / span 2;">
+            <input type="button" id="next-images-page" class="small" value="Next"
+                   style="display: inline-block; grid-column: 5 / span 2;">
         </div>
         <div class="modal-grid-images" id="pic-container-modal">
         </div>

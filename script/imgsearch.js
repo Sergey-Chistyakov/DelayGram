@@ -170,45 +170,52 @@ function addControls(div, idToSet = null, imgToSet = null) {
     let divSelectionMark = document.createElement('div');
     divSelectionMark.className = 'selected';
     divSelectionMark.innerHTML = '&#xE92D';
-    divSelectionMark.style.display = 'none';
+    divSelectionMark.style.opacity = '0';
     divSelectionMark.id = idToSet + '-selectionMark';
-    // div.addEventListener('click', ()=>{
-    //     divSelectionMark.style.display = (divSelectionMark.style.display == 'none') ? 'block' : 'none';
-    // });
     div.appendChild(divSelectionMark);
 
     // Add popup menu for selection and preview
-    //mouseover mouseout
-    //todo preview lighthouse of some kind
+    //todo preview lightbox of some kind
+    let widthShown = '50%';
+    let widthHide = '40%';
+    let opacityShown = '0.8';
+    let opacityHide = '0';
+
     let divPreview = document.createElement('div');
     divPreview.className = 'popup popup-top';
     divPreview.innerHTML = '&#xe8ff';
-    divPreview.style.opacity = '0';
+    divPreview.style.opacity = opacityHide;
+    divPreview.style.width = widthHide;
     div.appendChild(divPreview);
 
     let divSelect = document.createElement('div');
     divSelect.className = 'popup popup-bottom';
     divSelect.innerHTML = '&#xe876';
-    divSelect.style.opacity = '0';
+    divSelect.style.opacity = opacityHide;
+    divSelect.style.width = widthHide;
     divSelect.addEventListener('click', () => {
-        if (divSelectionMark.style.display == 'none') {
-            divSelectionMark.style.display = 'block';
+        if (Number.parseFloat(divSelectionMark.style.opacity) == 0 ) {
+            divSelectionMark.style.opacity = '0.5';
             divSelect.innerHTML = '&#xe5cd';
         } else {
-            divSelectionMark.style.display = 'none';
+            divSelectionMark.style.opacity = '0';
             divSelect.innerHTML = '&#xe876';
         }
     });
     div.appendChild(divSelect);
 
     div.addEventListener('mouseover', () => {
-        divPreview.style.opacity = '0.8';
-        divSelect.style.opacity = '0.8';
+        divPreview.style.opacity = opacityShown;
+        divSelect.style.opacity = opacityShown;
+        divPreview.style.width = widthShown;
+        divSelect.style.width = widthShown;
     });
 
     div.addEventListener('mouseout', () => {
-        divPreview.style.opacity = '0';
-        divSelect.style.opacity = '0';
+        divPreview.style.opacity = opacityHide;
+        divSelect.style.opacity = opacityHide;
+        divPreview.style.width = widthHide;
+        divSelect.style.width = widthHide;
     });
 
     return true;
