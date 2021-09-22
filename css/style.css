@@ -2,33 +2,39 @@
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 :root {
-/*	colors*/
-	--main-bg-color-all: white;
-	--main-color-element: #009999;
-	--main-color-elemenst-alt1: #6d2b5c;
-	--main-color-elemenst-alt2: #8c94ac;
+    /*	colors*/
 
-/*	texts*/
-	--main-text-color-dark: black;
-	--main-text-color-light: white;
+    --color-elements-1-rgb: 0, 153, 153;
+    --color-elements-2-rgb: 152, 83, 151;
+    --color-elements-3-rgb: 149, 177, 176;
+    --color-elements-4-rgb: 255, 135, 73;
 
-/*	miscellaneous*/
-	--border-radius: 2px;
+    --main-bg-color-all: #FFE7D4;
+    --color-elements-1: rgb(var(--color-elements-1-rgb));
+    --color-elements-2: rgb(var(--color-elements-2-rgb));
+    --color-elements-3: rgb(var(--color-elements-3-rgb));
+    --color-elements-4: rgb(var(--color-elements-4-rgb));
+
+    /*	texts*/
+    --main-text-color-dark: black;
+    --main-text-color-light: #FFE7D4;
+
+    /*	miscellaneous*/
+    --border-radius: 2px;
 }
 
 * {
     font-family: 'Roboto', sans-serif;
-	font-size: 12pt;
-    /* font-family: 'Caveat', cursive; */
+    font-size: 12pt;
+    background-color: var(--main-bg-color-all);
 }
 
 div {
-    background-color: var(--main-color-element);
     color: var(--main-text-color-light);
     border-radius: var(--border-radius);
 }
 
 div.container {
-	background-color: var(--main-bg-color-all);
-	color: var(--main-text-color-dark);
+    background-color: var(--main-bg-color-all);
+    color: var(--main-text-color-dark);
 }

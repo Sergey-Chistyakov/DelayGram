@@ -1,5 +1,5 @@
 input[type=button] {
-	background: var(--main-color-element);
+	background: var(--color-elements-1);
 	color: var(--main-text-color-light);
 	border: none;
 	border-radius: var(--border-radius);
@@ -8,7 +8,7 @@ input[type=button] {
 
 input[type=button]:hover,
 input[type=button]:focus {
-    background: var(--main-color-elemenst-alt1);
+    background: var(--color-elements-2);
     cursor: pointer;
 }
 
@@ -33,12 +33,12 @@ input[type=button].close:focus {
 }
 
 input[type=text] {
-	border: 2px solid var(--main-color-element);
+	border: 2px solid var(--color-elements-1);
     border-radius: var(--border-radius);
 }
 
 input[type=text]:focus,
 input[type=text]:hover{
     outline: none;
-    border-color: var(--main-color-elemenst-alt1);
+    border-color: var(--color-elements-2);
 }

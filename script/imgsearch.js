@@ -22,21 +22,149 @@ class MapExtended extends Map {
 
 class ModalImagePreviewElement {
 
+    _selected = false;
+    _options = {
+        //---------
+        divOpenLightbox: {
+            initial: {
+                className: 'triangle',
+                style: {
+                    opacity: '0',
+                    bottom: 'calc(var(--size-triangle) * -1)',
+                },
+            },
+            activated: {
+                style: {
+                    opacity: '0.8',
+                    bottom: 'calc(var(--size-triangle) * -0.5)',
+                },
+            },
+            deactivated: {
+                style: {
+                    opacity: '0',
+                    bottom: 'calc(var(--size-triangle) * -1)',
+                },
+            },
+        },
+
+        //---------
+        divOpenLightboxIcon: {
+            initial: {
+                className: 'triangle-bottom icons',
+                innerText: 'zoom_in',
+            },
+        },
+
+        //---------
+        divSelect: {
+            initial: {
+                className: 'triangle',
+                style: {
+                    opacity: '0',
+                    top: 'calc(var(--size-triangle) * -1)',
+                },
+            },
+            activated: {
+                style: {
+                    opacity: '0.8',
+                    top: 'calc(var(--size-triangle) * -0.5)',
+                },
+            },
+            deactivated: {
+                style: {
+                    opacity: '0',
+                    top: 'calc(var(--size-triangle) * -1)',
+                },
+            },
+        },
+
+        //---------
+        divSelectIcon: {
+            initial: {
+                className: 'triangle-top icons',
+                innerText: 'done',
+            },
+            activated: {
+                innerText: 'close',
+            },
+            deactivated: {
+                innerText: 'done',
+            },
+        },
+
+        //---------
+        divSelectionMark: {
+            initial: {
+                className: 'selected',
+                innerHTML: 'task_alt',
+                style: {opacity: '0'},
+            },
+            activated: {
+                style: {opacity: '0.5'},
+            },
+            deactivated: {
+                style: {opacity: '0'},
+            },
+        },
+    }
+
+
+    constructor(imgUrl = null) {
+        let div = objectWrapper(document.createElement('div'));
+        let divSelectionMark = objectWrapper(document.createElement('div'))
+            .setPropertiesValues(this._options.divSelectionMark.initial);
+        let divOpenLightbox = objectWrapper(document.createElement('div'))
+            .setPropertiesValues(this._options.divOpenLightbox.initial);
+        let divOpenLightboxIcon = objectWrapper(document.createElement('div'))
+            .setPropertiesValues(this._options.divOpenLightboxIcon.initial);
+        let divSelect = objectWrapper(document.createElement('div'))
+            .setPropertiesValues(this._options.divSelect.initial);
+        let divSelectIcon = objectWrapper(document.createElement('div'))
+            .setPropertiesValues(this._options.divSelectIcon.initial);
+        div.addChild(divOpenLightbox.addChild(divOpenLightboxIcon))
+            .addChild(divSelect.addChild(divSelectIcon))
+            .addChild(divSelectionMark);
+
+        div.addEventListener('mouseover', () => {
+            divOpenLightbox.setPropertiesValues(this._options.divOpenLightbox.activated);
+            divSelect.setPropertiesValues(this._options.divSelect.activated);
+        });
+
+        div.addEventListener('mouseout', () => {
+            divOpenLightbox.setPropertiesValues(this._options.divOpenLightbox.deactivated);
+            divSelect.setPropertiesValues(this._options.divSelect.deactivated);
+        });
+
+        divSelect.addEventListener('click', () => {
+            if (this._selected) {
+                divSelectionMark.setPropertiesValues(this._options.divSelectionMark.deactivated);
+                divSelectIcon.setPropertiesValues(this._options.divSelectIcon.deactivated);
+                this._selected = false;
+            } else {
+                divSelectionMark.setPropertiesValues(this._options.divSelectionMark.activated);
+                divSelectIcon.setPropertiesValues(this._options.divSelectIcon.activated);
+                this._selected = true;
+            }
+        });
+
+        this.result = div;
+    }
 }
 
 // Recursion yeah!!!
 function objectWrapper(objToWrapp) {
     Object.defineProperties(objToWrapp, {
+
         'setPropertiesValues': {
             value: function (propertiesObj = {}) {
                 if (Object.keys(propertiesObj).length < 1) return this;
                 for (let key in propertiesObj) {
                     try {
                         if (typeof propertiesObj[key] === 'object' && propertiesObj[key] !== null) {
-                         this[key]={};
+                            if (!(key in this)) this[key] = {};
                             this.setPropertiesValues.call(this[key], propertiesObj[key]);
                         } else
-                        this[key] = propertiesObj[key];
+                            this[key] = propertiesObj[key];
                     } catch (err) {
                         console.log(err);
                     }
@@ -44,14 +172,22 @@ function objectWrapper(objToWrapp) {
                 return this;
             }
         },
+
+        'addChild': {
+            value: function (child) {
+                if (!child.hasOwnProperty('setPropertiesValues')) objectWrapper(child);
+                this.appendChild(child);
+                return this;
+            }
+        },
     });
     return objToWrapp;
 }
 
-
 //------------------------------------------------------------------------------------------
 let imageMap = new MapExtended(); // Cache for images
 let queryMap = new MapExtended(); // Cache for queries
+let modalImagePreviewMap = new MapExtended(); // Modal images preview collection
 
 //------------------------------------------------------------------------------------------
 class WebQueryProvider {
@@ -182,80 +318,9 @@ let results = [
 let imgGridContainer = document.getElementById('pic-container-modal');
 let i = 0;
 for (let imageUrl of results.slice(0, 9)) {
-    let div = document.createElement('div');
-    imgGridContainer.appendChild(div);
-    div.appendChild((new ImageExtended()).setSRC(imageUrl));
-    addControls(div, (i++).toString());
+    let div = new ModalImagePreviewElement();
+    imgGridContainer.appendChild(div.result);
+    div.result.appendChild((new ImageExtended()).setSRC(imageUrl));
+    //addControls(div, (i++).toString());
 }
 
-//------------------------------------------------------------------------------------------
-// TODO replace with class!!!
-
-function addControls(div, idToSet = null, imgToSet = null) {
-    if (idToSet == null && div.id == undefined) return false;
-    if (idToSet == null) idToSet = div.id;
-
-    // Add mask for selected elements
-    let divSelectionMark = document.createElement('div');
-    divSelectionMark.className = 'selected';
-    divSelectionMark.innerHTML = '&#xE92D';
-    divSelectionMark.style.opacity = '0';
-    divSelectionMark.id = idToSet + '-selectionMark';
-    div.appendChild(divSelectionMark);
-
-    // Add popup menu for selection and preview
-    //TODO preview lightbox of some kind
-    let opacityShown = '0.8';
-    let opacityHide = '0';
-
-    let divOpenLightbox = document.createElement('div');
-    divOpenLightbox.className = 'triangle';
-    divOpenLightbox.style.opacity = opacityHide;
-    divOpenLightbox.style.bottom = 'calc(var(--size-triangle) * -1)';
-    let divOpenLightboxIcon = objectWrapper(document.createElement('div')).setPropertiesValues({
-        className: 'triangle-bottom icons',
-        innerText: 'zoom_in',
-    });
-    divOpenLightbox.appendChild(divOpenLightboxIcon);
-    div.appendChild(divOpenLightbox);
-
-    let divSelect = document.createElement('div');
-    divSelect.className = 'triangle';
-    divSelect.style.opacity = opacityHide;
-    divSelect.style.top = 'calc(var(--size-triangle) * -1)';
-    let divSelectIcon = objectWrapper(document.createElement('div')).setPropertiesValues({
-        className: 'triangle-top icons',
-        innerText: 'done',
-        // style: {
-        //     border: '1px solid red',
-        //     ['background-color']: 'green',
-        // },
-    });
-    divSelect.appendChild(divSelectIcon);
-    divSelect.addEventListener('click', () => {
-        if (Number.parseFloat(divSelectionMark.style.opacity) == 0) {
-            divSelectionMark.style.opacity = '0.5';
-            divSelectIcon.innerText = 'close';
-        } else {
-            divSelectionMark.style.opacity = '0';
-            divSelectIcon.innerText = 'done';
-        }
-    });
-    div.appendChild(divSelect);
-
-    div.addEventListener('mouseover', () => {
-        divOpenLightbox.style.opacity = opacityShown;
-        divSelect.style.opacity = opacityShown;
-        divOpenLightbox.style.bottom = 'calc(var(--size-triangle) * -0.5)';
-        divSelect.style.top = 'calc(var(--size-triangle) * -0.5)';
-    });
-
-    div.addEventListener('mouseout', () => {
-        divOpenLightbox.style.opacity = opacityHide;
-        divSelect.style.opacity = opacityHide;
-        divOpenLightbox.style.bottom = 'calc(var(--size-triangle) * -1)';
-        divSelect.style.top = 'calc(var(--size-triangle) * -1)';
-    });
-
-    return true;
-}

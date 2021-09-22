@@ -13,6 +13,8 @@
     <link type="text/css" rel="stylesheet" href="css/modal.css">
     <link type="text/css" rel="stylesheet" href="css/flex.css">
     <link type="text/css" rel="stylesheet" href="css/input.css">
+    <link type="text/css" rel="stylesheet" href="css/lightbox.css">
+    <link type="text/css" rel="stylesheet" href="css/loading.css">
     <!--CSS End-->
 
     <!--JS Begin-->
@@ -22,7 +24,18 @@
 
 </head>
 <body>
-
+<!-- loading screen Begin -->
+<div class="loading-container" id="loading-container">
+    <div class="loading-content">
+        <div class="loading-text">Loading</div>
+        <div class="loading-1 load"><div></div></div>
+        <div class="loading-2 load"><div></div></div>
+        <div class="loading-3 load"><div></div></div>
+        <div class="loading-4 load"><div></div></div>
+        <div class="loading-5 load"><div></div></div>
+    </div>
+</div>
+<!-- loading screen End -->
 <!-- modal-container Begin -->
 <div id="modal" class="modal-container">
     <div class="modal-content">
@@ -43,9 +56,8 @@
         </div>
     </div>
 </div>
-
 <!-- modal-container End -->
-
+<!-- main-container Begin -->
 <div class="grid-container">
     <!-- header -->
     <div class="item-header" id="header">
@@ -58,6 +70,8 @@
         <div style="background-color: var(--main-bg-color-all);">
             <input type="button" id="button" value="Find and add Image" style="width: 100%; max-width: 1250px;"
                    class="large">
+            <input type="button" id="buttonOpenLoader" value="Load loader" style="width: 100%; max-width: 1250px;"
+                   class="large">
         </div>
         <div id="pic-container-main" class="flex-container">
             <div id="PicPlace">First thing</div>
@@ -68,5 +82,6 @@
     <!-- Footer -->
     <div class="item-footer" id="footer" style="color: black;">Sergey Chistyakov<br>2021</div>
 </div>
+<!-- main-container End -->
 </body>
 </html>
