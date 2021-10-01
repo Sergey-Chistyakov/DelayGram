@@ -1,9 +1,11 @@
 input[type=button] {
-	background: var(--color-elements-1);
-	color: var(--main-text-color-light);
-	border: none;
-	border-radius: var(--border-radius);
+    display: block;
+    background: var(--color-elements-1);
+    color: var(--main-text-color-light);
+    border: 2px solid var(--main-text-color-light);
+    border-radius: var(--border-radius);
     height: 34px;
+    width: 100%;
 }
 
 input[type=button]:hover,
@@ -13,32 +15,35 @@ input[type=button]:focus {
 }
 
 input[type=button].large {
-    margin: 10px;
-    padding: 20px;
+    /*margin: 10px;*/
+    /*padding: 20px;*/
 }
 
 input[type=button].close {
     font-family: 'Material Icons';
-    color: gray;
+    color: black;
     font-size: 32px;
     font-weight: bold;
-    background: var(--main-bg-color-all);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+
 }
 
 input[type=button].close:hover,
 input[type=button].close:focus {
-    color: black;
+    color: white;
     text-decoration: none;
     cursor: pointer;
 }
 
 input[type=text] {
-	border: 2px solid var(--color-elements-1);
+    border: 2px solid var(--color-elements-1);
     border-radius: var(--border-radius);
 }
 
 input[type=text]:focus,
-input[type=text]:hover{
+input[type=text]:hover {
     outline: none;
     border-color: var(--color-elements-2);
 }

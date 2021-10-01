@@ -17,7 +17,7 @@
 
     /*	texts*/
     --main-text-color-dark: black;
-    --main-text-color-light: #FFE7D4;
+    --main-text-color-light: white;
 
     /*	miscellaneous*/
     --border-radius: 2px;
@@ -26,15 +26,22 @@
 * {
     font-family: 'Roboto', sans-serif;
     font-size: 12pt;
-    background-color: var(--main-bg-color-all);
 }
 
 div {
     color: var(--main-text-color-light);
     border-radius: var(--border-radius);
+    /*background-color: var(--main-bg-color-all);*/
 }
 
 div.container {
-    background-color: var(--main-bg-color-all);
     color: var(--main-text-color-dark);
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    height: 100%;
+    overflow: hidden;
+    background-image: radial-gradient(#f1f1f1, #e7e7e7,#dddddd,#d6d6d6,#cecece, #c7c7c7);
 }

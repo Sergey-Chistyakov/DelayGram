@@ -1,23 +1,70 @@
 'use strict'
 
-let modal = document.getElementById("modal");
-let btn = document.getElementById("button");
-let span = document.getElementById("buttonCloseModal");
-let loader = document.getElementById("loading-container");
-let btnOpenLoader = document.getElementById('buttonOpenLoader');
+//---------------------------------------------------------------------------------------------------------------------
+let mainDOMElements = {
+    main: {
+        btn: document.getElementById("button"),
+        btnOpenLoader: document.getElementById('buttonOpenLoader'),
+    },
+    modal: {
+        screen: document.getElementById("modal"),
+        inputTextSearch: document.getElementById('input-text-query'),
+        buttonSearchNext: document.getElementById('next-images-page'),
+        buttonSearch: document.getElementById('button-query-search'),
+        buttonCloseModalScreen: document.getElementById("buttonCloseModal"),
+        imgGridContainer: document.getElementById('pic-container-modal'),
+    },
+    loaderScreen: document.getElementById("loading-container"),
+};
 
-btn.onclick = function () {
-    modal.style.display = "block";
+//---------------------------------------------------------------------------------------------------------------------
+class ModalInputElementsControll {
+    constructor(elem) {
+        elem.onclick = this.onClick.bind(this);
+    }
+
+    search() {
+        startSearch(mainDOMElements.modal.inputTextSearch.value);
+    }
+
+    pageNext() {
+        nextSearch();
+    }
+
+    pagePrev(){
+        prevSearch();
+    }
+
+    closeModal() {
+        mainDOMElements.modal.screen.style.display = 'none';
+    }
+
+    commitSelected(){
+        alert('selection Commit');
+        mainDOMElements.modal.screen.style.display = 'none';
+    }
+
+    onClick(event) {
+        let action = event.target.dataset.action;
+        if (action) {
+            this[action]();
+        }
+    };
 }
 
-span.onclick = function () {
-    modal.style.display = "none";
+//---------------------------------------------------------------------------------------------------------------------
+new ModalInputElementsControll(mainDOMElements.modal.screen);
+
+
+//---------------------------------------------------------------------------------------------------------------------
+mainDOMElements.main.btn.onclick = function () {
+    mainDOMElements.modal.screen.style.display = "block";
 }
 
-btnOpenLoader.onclick = function () {
-    loader.style.display = 'block';
+mainDOMElements.main.btnOpenLoader.onclick = function () {
+    mainDOMElements.loaderScreen.style.display = 'block';
 }
 
-loader.onclick = function () {
-    loader.style.display = 'none';
+mainDOMElements.loaderScreen.onclick = function () {
+    mainDOMElements.loaderScreen.style.display = 'none';
 }

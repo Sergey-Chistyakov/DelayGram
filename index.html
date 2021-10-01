@@ -18,8 +18,8 @@
     <!--CSS End-->
 
     <!--JS Begin-->
-    <script type="text/javascript" defer src="script/imgsearch.js"></script>
     <script type="text/javascript" defer src="script/pageinit.js"></script>
+    <script type="text/javascript" defer src="script/imgsearch.js"></script>
     <!--JS End-->
 
 </head>
@@ -28,11 +28,21 @@
 <div class="loading-container" id="loading-container">
     <div class="loading-content">
         <div class="loading-text">Loading</div>
-        <div class="loading-1 load"><div></div></div>
-        <div class="loading-2 load"><div></div></div>
-        <div class="loading-3 load"><div></div></div>
-        <div class="loading-4 load"><div></div></div>
-        <div class="loading-5 load"><div></div></div>
+        <div class="loading-1 load">
+            <div></div>
+        </div>
+        <div class="loading-2 load">
+            <div></div>
+        </div>
+        <div class="loading-3 load">
+            <div></div>
+        </div>
+        <div class="loading-4 load">
+            <div></div>
+        </div>
+        <div class="loading-5 load">
+            <div></div>
+        </div>
     </div>
 </div>
 <!-- loading screen End -->
@@ -40,16 +50,15 @@
 <div id="modal" class="modal-container">
     <div class="modal-content">
         <div class="modal-grid-header">
-            <input type="text" id="query"
-                   style="display: inline-block; grid-column: 1 / span 4;">
-            <input type="button" id="query-search" class="small" value="Search"
+            <input type="text" id="input-text-query" style="display: inline-block; grid-column: 1 / span 4;">
+            <input type="button" data-action="search" id="button-query-search" class="small" value="Search"
                    style="display: inline-block; grid-column: 5 / span 2;">
-            <input type="button" class="close" id="buttonCloseModal" value="&#xE5CD">
-            <input type="button" id="previous-images-page" class="small" value="Previous"
+            <input type="button" data-action="closeModal" class="close" id="buttonCloseModal" value="close">
+            <input type="button" data-action="pagePrev" id="previous-images-page" class="small" value="Previous"
                    style="display: inline-block; grid-column: 1 / span 2;">
-            <input type="button" id="selected-images-confirm" class="small" value="Confirm selected"
-                   style="display: inline-block; grid-column: 3 / span 2;">
-            <input type="button" id="next-images-page" class="small" value="Next"
+            <input type="button" data-action="commitSelected" id="selected-images-confirm" class="small"
+                   value="Confirm selected" style="display: inline-block; grid-column: 3 / span 2;">
+            <input type="button" data-action="pageNext" id="next-images-page" class="small" value="Next"
                    style="display: inline-block; grid-column: 5 / span 2;">
         </div>
         <div class="modal-grid-images" id="pic-container-modal">
@@ -67,12 +76,8 @@
     </div>
     <!-- Main -->
     <div class="item-main" id="main">
-        <div style="background-color: var(--main-bg-color-all);">
-            <input type="button" id="button" value="Find and add Image" style="width: 100%; max-width: 1250px;"
-                   class="large">
-            <input type="button" id="buttonOpenLoader" value="Load loader" style="width: 100%; max-width: 1250px;"
-                   class="large">
-        </div>
+        <input type="button" id="button" value="Find and add Image" class="large">
+        <input type="button" id="buttonOpenLoader" value="Load loader" class="large">
         <div id="pic-container-main" class="flex-container">
             <div id="PicPlace">First thing</div>
             <div>Other thing</div>

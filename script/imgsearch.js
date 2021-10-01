@@ -11,11 +11,46 @@ class ImageExtended extends Image {
         this.alt = '';
         return this;
     }
+
+    promise(srcToSet = null, mapToCheck = null) {
+        let promise = new Promise(((resolve, reject) => {
+            if (srcToSet == null) {
+                reject(new Error('No image URL!'));
+            }
+            if (mapToCheck != null && mapToCheck.has(srcToSet)) {
+                if (mapToCheck.get(srcToSet) instanceof Error)
+                    reject(new Error('Failed to load image'));
+                if (mapToCheck.get(srcToSet).complete)
+                    resolve(mapToCheck.get(srcToSet));
+            }
+            this.onload = () => {
+                if (mapToCheck != null) {
+                    mapToCheck.set(srcToSet, this);
+                    setTimeout(() => {
+                        mapToCheck.delete(srcToSet);
+                    }, 900000); //clear cache after 15 minuts
+                }
+                resolve(this);
+            };
+            this.onerror = () => {
+                if (mapToCheck != null) mapToCheck.set(srcToSet, new Error('Failed to load image'));
+                reject(new Error('Failed to load image'));
+            };
+            this.src = srcToSet;
+        }));
+        return promise;
+    }
 }
 
 class MapExtended extends Map {
-    getOrSet(value, TypeConstructor) {
+    constructor() {
+        super();
+        this.lastAccessed = null;
+    }
+
+    setAndGet(value, TypeConstructor) {
         if (!this.has(value)) this.set(value, new TypeConstructor(value));
+        this.lastAccessed = this.get(value);
         return this.get(value);
     }
 }
@@ -28,22 +63,7 @@ class ModalImagePreviewElement {
         divOpenLightbox: {
             initial: {
                 className: 'triangle',
-                style: {
-                    opacity: '0',
-                    bottom: 'calc(var(--size-triangle) * -1)',
-                },
-            },
-            activated: {
-                style: {
-                    opacity: '0.8',
-                    bottom: 'calc(var(--size-triangle) * -0.5)',
-                },
-            },
-            deactivated: {
-                style: {
-                    opacity: '0',
-                    bottom: 'calc(var(--size-triangle) * -1)',
-                },
+                attributesToSet: {trianglePosition: 'bottom', active: 'false',},
             },
         },
 
@@ -59,22 +79,7 @@ class ModalImagePreviewElement {
         divSelect: {
             initial: {
                 className: 'triangle',
-                style: {
-                    opacity: '0',
-                    top: 'calc(var(--size-triangle) * -1)',
-                },
-            },
-            activated: {
-                style: {
-                    opacity: '0.8',
-                    top: 'calc(var(--size-triangle) * -0.5)',
-                },
-            },
-            deactivated: {
-                style: {
-                    opacity: '0',
-                    top: 'calc(var(--size-triangle) * -1)',
-                },
+                attributesToSet: {trianglePosition: 'top', active: 'false',},
             },
         },
 
@@ -95,63 +100,54 @@ class ModalImagePreviewElement {
         //---------
         divSelectionMark: {
             initial: {
-                className: 'selected',
-                innerHTML: 'task_alt',
-                style: {opacity: '0'},
-            },
-            activated: {
-                style: {opacity: '0.5'},
-            },
-            deactivated: {
-                style: {opacity: '0'},
+                className: 'selectionMark',
+                innerText: 'task_alt',
+                attributesToSet: {active: 'false'},
             },
         },
-    }
-
+    };
 
     constructor(imgUrl = null) {
-        let div = objectWrapper(document.createElement('div'));
-        let divSelectionMark = objectWrapper(document.createElement('div'))
+        this.div = objectWrapper(document.createElement('div'));
+        this.divSelectionMark = objectWrapper(document.createElement('div'))
             .setPropertiesValues(this._options.divSelectionMark.initial);
-        let divOpenLightbox = objectWrapper(document.createElement('div'))
+        this.divOpenLightbox = objectWrapper(document.createElement('div'))
             .setPropertiesValues(this._options.divOpenLightbox.initial);
-        let divOpenLightboxIcon = objectWrapper(document.createElement('div'))
+        this.divOpenLightboxIcon = objectWrapper(document.createElement('div'))
             .setPropertiesValues(this._options.divOpenLightboxIcon.initial);
-        let divSelect = objectWrapper(document.createElement('div'))
+        this.divSelect = objectWrapper(document.createElement('div'))
             .setPropertiesValues(this._options.divSelect.initial);
-        let divSelectIcon = objectWrapper(document.createElement('div'))
+        this.divSelectIcon = objectWrapper(document.createElement('div'))
             .setPropertiesValues(this._options.divSelectIcon.initial);
-        div.addChild(divOpenLightbox.addChild(divOpenLightboxIcon))
-            .addChild(divSelect.addChild(divSelectIcon))
-            .addChild(divSelectionMark);
 
-        div.addEventListener('mouseover', () => {
-            divOpenLightbox.setPropertiesValues(this._options.divOpenLightbox.activated);
-            divSelect.setPropertiesValues(this._options.divSelect.activated);
+        this.div.addChild(this.divOpenLightbox.addChild(this.divOpenLightboxIcon))
+            .addChild(this.divSelect.addChild(this.divSelectIcon))
+            .addChild(this.divSelectionMark);
+
+        this.div.addEventListener('mouseover', () => {
+            this.divOpenLightbox.activated = true;
+            this.divSelect.activated = true;
         });
 
-        div.addEventListener('mouseout', () => {
-            divOpenLightbox.setPropertiesValues(this._options.divOpenLightbox.deactivated);
-            divSelect.setPropertiesValues(this._options.divSelect.deactivated);
+        this.div.addEventListener('mouseout', () => {
+            this.divOpenLightbox.activated = false;
+            this.divSelect.activated = false;
         });
 
-        divSelect.addEventListener('click', () => {
+        this.divSelect.addEventListener('click', () => {
             if (this._selected) {
-                divSelectionMark.setPropertiesValues(this._options.divSelectionMark.deactivated);
-                divSelectIcon.setPropertiesValues(this._options.divSelectIcon.deactivated);
+                this.divSelectionMark.activated = false;
+                this.divSelectIcon.setPropertiesValues(this._options.divSelectIcon.deactivated);
                 this._selected = false;
             } else {
-                divSelectionMark.setPropertiesValues(this._options.divSelectionMark.activated);
-                divSelectIcon.setPropertiesValues(this._options.divSelectIcon.activated);
+                this.divSelectionMark.activated = true;
+                this.divSelectIcon.setPropertiesValues(this._options.divSelectIcon.activated);
                 this._selected = true;
             }
         });
-
-        this.result = div;
     }
 }
 
-// Recursion yeah!!!
 function objectWrapper(objToWrapp) {
     Object.defineProperties(objToWrapp, {
 
@@ -161,10 +157,12 @@ function objectWrapper(objToWrapp) {
                 for (let key in propertiesObj) {
                     try {
                         if (typeof propertiesObj[key] === 'object' && propertiesObj[key] !== null) {
-                            if (!(key in this)) this[key] = {};
-                            this.setPropertiesValues.call(this[key], propertiesObj[key]);
-                        } else
-                            this[key] = propertiesObj[key];
+                            if (key == 'attributesToSet') this.setCustomAttributes(propertiesObj[key]);
+                            else {
+                                if (!(key in this)) this[key] = {};
+                                this.setPropertiesValues.call(this[key], propertiesObj[key]);
+                            }
+                        } else this[key] = propertiesObj[key];
                     } catch (err) {
                         console.log(err);
                     }
@@ -175,10 +173,22 @@ function objectWrapper(objToWrapp) {
 
         'addChild': {
             value: function (child) {
-                if (!child.hasOwnProperty('setPropertiesValues')) objectWrapper(child);
+                if (!child.hasOwnProperty('addChild')) objectWrapper(child);
                 this.appendChild(child);
                 return this;
             }
+        },
+
+        'setCustomAttributes': {
+            value: function (customAttrObj) {
+                for (let [key, value] of Object.entries(customAttrObj)) this.setAttribute(key, value);
+            },
+        },
+
+        'activated': {
+            set: function (setActive = true) {
+                this.setAttribute('active', setActive.toString());
+            },
         },
     });
     return objToWrapp;
@@ -194,11 +204,10 @@ class WebQueryProvider {
     #lastSearch = new Date(0);
     #searchHttp = '';
     #runs = false;
-    #searchDelay = 120000;      // ms
+    #searchDelay = 300000;              // ms
     #totalResults = null;
-    #resultRequestImageUrls = [];
-    #shownImages = 0;
-    #resultImages = new Map();
+    #resultRequestImageUrls = [];       //URL
+    #resultRequestImageExtendeds = [];  //DOM elements, loaded without errors
 
     #options = {
         cx: CSE,
@@ -213,42 +222,72 @@ class WebQueryProvider {
         imgSize: "LARGE",
     }
 
-    set resultsQuantity(value) {
-        if (!value && !isNaN(value) && value <= 10 && value > 0) this.#options.num = value;
-        return this;
-    }
-
-    set startResultsNumber(value) {
-        if (!value || !isNaN(value) && (this.#totalResults > 0) ? value <= this.#totalResults : true) this.#options.start = value;
-        return this;
+    resultObj = {
+        page: null,
+        query: this.#options.q,
+        navigate: null,
+        imgExtResultArr: [],
     }
 
     get #canSearchFurther() {
         return this.#totalResults == null || (this.#totalResults >= this.#options.start && this.#options.start + this.#options.num < 100);
     }
 
-    get results() {
-        return this.#resultRequestImageUrls;
-    }
+//TODO add errors: all possible results shown already, user on first page of results, ...
+    async getPageResults({
+                             page = null,
+                             navigate = null,
+                         } = {}) {
+        try {
+            if (page == null) {
+                await this.commit();
+                page = 1;
+            }
 
-    resultsNext(numOfResults) {
+            //todo precheck if can go further
+            if (navigate == 'next') page++;
+            if (navigate == 'previous' && page > 1) page--;
 
-    }
+            while (this.#resultRequestImageExtendeds.length < page * 9 && this.#canSearchFurther) {
+                await this.commit();
+                if (this.#resultRequestImageUrls.length == 0) throw new Error('Response has no results');
 
-    constructor(query, start = 0, resultsQuantity = 10) {
-        if (!query || query.replace(/\s/ig, '').length < 3) {
-            alert('Search query must be more or three symbols!');
-            return null;
+                let promises = [];
+                this.#resultRequestImageUrls.forEach((url) => {
+                    promises.push(new ImageExtended().promise(url, imageMap));
+                });
+                this.#resultRequestImageUrls.length = 0;
+
+                let promisesResults = await Promise.allSettled(promises);
+                promisesResults.filter(({status}) => {
+                    return status == 'fulfilled';
+                }).forEach(({value}) => {
+                    this.#resultRequestImageExtendeds.push(value);
+                });
+            }
+
+        } catch (err) {
+            alert(err);
+        } finally {
+            this.resultObj.page = page;
+            this.resultObj.query = this.#options.q;
+            this.resultObj.navigate = 'next';
+            this.resultObj.imgExtResultArr = this.#resultRequestImageExtendeds.slice((page - 1) * 9, page * 9 + 1);
+
+            return this.resultObj;
         }
-
-        this.#options.q = query;
-        this.#options.start = (isNaN(start) || !!start) ? 0 : start;
-        this.#options.num = (isNaN(resultsQuantity) || !!resultsQuantity) ? 10 : resultsQuantity;
     }
 
+    constructor(query) {
+        this.#options.q = query;
+    }
 
     async commit() {
-        if (this.#runs || !this.#canSearchFurther || (Date.now() - this.#lastSearch < this.#searchDelay)) return;
+        if (this.#runs || !this.#canSearchFurther /*|| (Date.now() - this.#lastSearch < this.#searchDelay)*/) return;
+        await this.#commit();
+    }
+
+    async #commit() {
         try {
             this.#establishQuery();
             this.#runs = true;
@@ -258,10 +297,7 @@ class WebQueryProvider {
                 for (let responseItem of json.items) {
                     this.#resultRequestImageUrls.push(responseItem.link);
                 }
-                if (this.#resultRequestImageUrls.length == 0) {
-                    throw new Error('EmptyResponse');
-                }
-                if (json.queries.nextPage.length == 1) { // !!!!!!!!!!!!! check if property exists
+                if ('nextPage' in json.queries && json.queries.nextPage.length == 1) {
                     this.#options.start = json.queries.nextPage[0].startIndex;
                     this.#totalResults = Number.parseInt(json.queries.nextPage[0].totalResults);
                 }
@@ -288,22 +324,6 @@ class WebQueryProvider {
 
 //-TEST MAIN EXECUTABLE FUNCTION------------------------------------------------------------
 
-// (async () => {
-//     let queryToDo = queryMap.getOrSet('Sun and moon', WebQueryProvider); // query goes here!!!!
-//     await queryToDo.commit();
-//     let results = queryToDo.results;
-//
-//     let imgGridContainer = document.getElementById('pic-container-modal');
-//
-//     for (let imageUrl of results.slice(0,9)) {
-//         let div = document.createElement('div');
-//         imgGridContainer.appendChild(div);
-//         div.appendChild((new ImageExtended()).setSRC(imageUrl));
-//         addControls(div, 'first');
-//
-//     }
-// })();
-
 let results = [
     'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Supermoon_Nov-14-2016-minneapolis.jpg/1200px-Supermoon_Nov-14-2016-minneapolis.jpg',
     'https://phantom-marca.unidadeditorial.es/d3c076d28d2768328f83c297d722ddcb/crop/268x219/1257x776/f/jpg/assets/multimedia/imagenes/2021/07/23/16270444581760.jpg',
@@ -315,12 +335,61 @@ let results = [
     'https://www.thelist.com/img/gallery/heres-what-the-new-moon-on-march-13-means-for-your-zodiac-sign/l-intro-1615565866.jpg',
     'https://www.boltonvalley.com/wp-content/uploads/2021/06/buck-moon.jpg',
 ];
-let imgGridContainer = document.getElementById('pic-container-modal');
+
 let i = 0;
 for (let imageUrl of results.slice(0, 9)) {
     let div = new ModalImagePreviewElement();
-    imgGridContainer.appendChild(div.result);
-    div.result.appendChild((new ImageExtended()).setSRC(imageUrl));
-    //addControls(div, (i++).toString());
+    mainDOMElements.modal.imgGridContainer.appendChild(div.div);
+    div.div.appendChild((new ImageExtended()).setSRC(imageUrl));
 }
 
+function startSearch(query) {
+    (async () => {
+        if (!query || query.replace(/\s/ig, '').length < 3) {
+            alert('Search query must be three or more symbols! (whitespaces excluded)');
+            return;
+        }
+        mainDOMElements.loaderScreen.style.display = 'block';
+        let queryToDo = queryMap.setAndGet(query, WebQueryProvider);
+        await queryToDo.getPageResults();
+        fillImagesPreviewModal(queryToDo.resultObj.imgExtResultArr);
+        mainDOMElements.loaderScreen.style.display = 'none';
+        mainDOMElements.modal.inputTextSearch.value = queryToDo.resultObj.query;
+    })();
+}
+
+function nextSearch() {
+    (async () => {
+        let queryToDo = queryMap.lastAccessed;
+        if (queryToDo == null) return;
+        mainDOMElements.loaderScreen.style.display = 'block';
+        queryToDo.resultObj.navigate = 'next';
+        await queryToDo.getPageResults(queryToDo.resultObj);
+        fillImagesPreviewModal(queryToDo.resultObj.imgExtResultArr);
+        mainDOMElements.loaderScreen.style.display = 'none';
+        mainDOMElements.modal.inputTextSearch.value = queryToDo.resultObj.query;
+    })();
+}
+
+function prevSearch() {
+    (async () => {
+        let queryToDo = queryMap.lastAccessed;
+        if (queryToDo == null) return;
+        mainDOMElements.loaderScreen.style.display = 'block';
+        queryToDo.resultObj.navigate = 'previous';
+        await queryToDo.getPageResults(queryToDo.resultObj);
+        fillImagesPreviewModal(queryToDo.resultObj.imgExtResultArr);
+        mainDOMElements.loaderScreen.style.display = 'none';
+        mainDOMElements.modal.inputTextSearch.value = queryToDo.resultObj.query;
+    })();
+}
+
+function fillImagesPreviewModal(resultsImgArr) {
+    mainDOMElements.modal.imgGridContainer.innerHTML = '';
+
+    for (let imgExt of resultsImgArr) {
+        let div = new ModalImagePreviewElement();
+        mainDOMElements.modal.imgGridContainer.appendChild(div.div);
+        div.div.appendChild(imgExt);
+    }
+}

@@ -1,5 +1,5 @@
 .modal-container {
-    display: block; /* Hidden by default */
+    display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
     left: 0;
@@ -21,11 +21,12 @@
     color: black;
     opacity: 1.0;
     text-align: center;
+    background-image: radial-gradient(circle, #f1f1f1, #e7e7e7,#dddddd,#d6d6d6,#cecece, #c7c7c7);
 }
 
 .modal-grid-header {
     display: grid;
-    background-color: var(--main-bg-color-all);
+    background-color: transparent;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 32px;
     gap: 10px 10px;
 }
@@ -34,19 +35,21 @@
     display: grid;
     margin: 10px 43px 0px 0px;
     gap: 10px 10px;
-    background-color: var(--main-bg-color-all);
+    background-color: transparent;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: repeat(3, minmax(24vh, 1fr));
+
 }
 
 .modal-grid-images > div {
     position: relative;
-    background: var(--main-bg-color-all);
-    border: 1px solid var(--color-elements-1);
+    background: gray;
+    border: 2px solid var(--main-text-color-light);
+    border-radius: var(--border-radius);
     overflow: hidden;
 }
 
-.modal-grid-images > div > div.selected {
+.modal-grid-images > div > div.selectionMark {
     font-family: 'Material Icons';
     font-size: 24vh;
     width: 100%;
@@ -63,11 +66,12 @@
 
 .modal-grid-images > div > img {
     position: absolute;
-    max-width: 100%;
+    max-width: calc(100% - 10px);
+    max-height: calc(100% - 10px);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    -webkit-user-drag: none;
+    user-select: none;
 }
 
 .modal-grid-images > div > div.triangle {
@@ -77,7 +81,7 @@
     left: calc(50% - calc(var(--size-triangle) / 2));
     height: var(--size-triangle);
     width: var(--size-triangle);
-    transition: bottom 0.3s, top 0.3s, opacity 0.5s;
+    transition: bottom 0.3s, top 0.3s;
     background-color: transparent;
     z-index: 3;
 }
@@ -94,6 +98,8 @@
     transform-origin: center;
     transform: rotate(45deg) scale(calc(1 / var(--scale-div-before)), calc(1 / var(--scale-div-before)));
     z-index: 4;
+    border: 2px solid var(--main-text-color-light);
+    opacity: 0.8;
 }
 
 .modal-grid-images > div > div.triangle > div.icons {
@@ -117,5 +123,26 @@
     top: 8%;
 }
 
+.modal-grid-images > div > div.triangle[trianglePosition=bottom][active=true] {
+    bottom: calc(var(--size-triangle) * -0.5);
+}
 
+.modal-grid-images > div > div.triangle[trianglePosition=bottom][active=false] {
+    bottom: calc(var(--size-triangle) * -1);
+}
 
+.modal-grid-images > div > div.triangle[trianglePosition=top][active=true] {
+    top: calc(var(--size-triangle) * -0.5);
+}
+
+.modal-grid-images > div > div.triangle[trianglePosition=top][active=false] {
+    top: calc(var(--size-triangle) * -1);
+}
+
+.modal-grid-images > div > div.selectionMark[active=true] {
+    opacity: 0.5;
+}
+
+.modal-grid-images > div > div.selectionMark[active=false] {
+    opacity: 0;
+}

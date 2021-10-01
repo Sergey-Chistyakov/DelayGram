@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+
+    <script>
+
+        class ImageExtended extends Image {
+            setSRC(srcToSet) {
+                this.src = srcToSet;
+                this.alt = '';
+                return this;
+            }
+
+            promise(srcToSet = null, mapToCheck = null) {
+                let promise = new Promise(((resolve, reject) => {
+                    if (srcToSet == null) {
+                        reject(new Error('No image URL!'));
+                    }
+                    if (mapToCheck != null && mapToCheck.has(srcToSet) && mapToCheck.get(srcToSet).complete)
+                        resolve(mapToCheck.get(srcToSet));
+                    this.onload = () => {
+                        if (mapToCheck != null) mapToCheck.set(srcToSet, this);
+                        resolve(this);
+                    };
+                    this.onerror = () => {
+                        reject(new Error('Failed to load!'));
+                    };
+                    this.src = srcToSet;
+                }));
+                return promise;
+            }
+        }
+
+        class MapExtended extends Map {
+            constructor() {
+                super();
+                this.lastAccessed = null;
+            }
+
+            getOrSet(value, TypeConstructor) {
+                if (!this.has(value)) this.set(value, new TypeConstructor(value));
+                this.lastAccessed = this.get(value);
+                return this.get(value);
+            }
+        }
+
+        let imageMap = new MapExtended(); // Cache for images
+
+        async function checkIt(url) {
+
+            let list = document.getElementById('result-list');
+            let listItem = document.createElement('li');
+            let listItemSub1 = document.createElement('li');
+            let listItemSub2 = document.createElement('li');
+            list.appendChild(listItem);
+            listItem.innerText = url;
+            listItem.appendChild(listItemSub1);
+            listItem.appendChild(listItemSub2);
+            let timer = new Date();
+
+            new ImageExtended().promise(url, imageMap)
+                .then((result) => {
+                    document.body.appendChild(result);
+                    listItemSub1.innerText = 'ok';
+                }).catch((err) => {
+                listItemSub1.innerText = err.toString();
+            }).finally(() => {
+                listItemSub2.innerText =  `${(new Date().getTime()) - timer.getTime()} ms`;
+            });
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: gray;
+        }
+
+        * {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <input type="text" id="input-text-url">
+    <input type="button" value="Check url" onclick="checkIt(document.getElementById('input-text-url').value)">
+    <p>List of things:</p>
+    <ul id="result-list">
+    </ul>
+</div>
+</body>
+</html>

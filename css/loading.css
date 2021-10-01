@@ -1,5 +1,5 @@
 :root {
-    --basic-loading-size: 3vh;
+    --basic-loading-size: 2vh;
     --background-gradient: linear-gradient(-45deg, var(--color-elements-1), var(--color-elements-2), var(--color-elements-3), var(--color-elements-4), var(--color-elements-1), var(--color-elements-2), var(--color-elements-3), var(--color-elements-4));
 }
 
@@ -12,7 +12,7 @@
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: hidden; /* Enable scroll if needed */
-    background: radial-gradient(circle, rgba(0, 0, 0, 1) 25%, rgba(255, 255, 255, 0.3) 100%);
+    background: radial-gradient(circle, rgba(0, 0, 0, 1) 15%, rgba(255, 255, 255, 0.3) 100%);
 }
 
 .loading-content {
@@ -86,15 +86,15 @@
     height: calc(var(--basic-loading-size) * 6);
     width: calc(var(--basic-loading-size) * 6);
     transform: translate(-50%, -50%) rotate(180deg);
-    animation: animate-rotation 5s infinite linear;
+    animation: animate-rotation 20s infinite linear;
 }
-
 
 .loading-3 {
     z-index: 37;
     height: calc(var(--basic-loading-size) * 9);
     width: calc(var(--basic-loading-size) * 9);
     transform: translate(-50%, -50%) rotate(315deg);
+    filter: blur(1px);
 }
 
 .loading-4 {
@@ -103,6 +103,7 @@
     width: calc(var(--basic-loading-size) * 9.5);
     transform: translate(-50%, -50%) rotate(180deg);
     animation: animate-scale-opacity 3s infinite linear;
+    filter: blur(2px);
 }
 
 .loading-5 {
@@ -112,6 +113,7 @@
     transform: translate(-50%, -50%) rotate(180deg);
     animation: animate-scale-opacity 3s infinite linear;
     animation-delay: -1.5s;
+    filter: blur(2px);
 }
 
 @keyframes animate-gradient {
@@ -126,19 +128,19 @@
 @keyframes animate-rotation {
     0% {transform: translate(-50%, -50%) rotate(0deg) scale(1);}
     6.25% {transform: translate(-50%, -50%) rotate(22.5deg) scale(1.1);}
-    12.5% {transform: translate(-50%, -50%) rotate(45deg) scale(1.2);}
+    12.5% {transform: translate(-50%, -50%) rotate(45deg) scale(1.4);}
     18.75% {transform: translate(-50%, -50%) rotate(67.5deg) scale(1.1);}
     25% {transform: translate(-50%, -50%) rotate(90deg) scale(1);}
     31.25% {transform: translate(-50%, -50%) rotate(112.5deg) scale(0.9);}
-    37.5% {transform: translate(-50%, -50%) rotate(135deg) scale(0.8);}
+    37.5% {transform: translate(-50%, -50%) rotate(135deg) scale(0.75);}
     43.75% {transform: translate(-50%, -50%) rotate(157.5deg) scale(0.9);}
     50% {transform: translate(-50%, -50%) rotate(180deg) scale(1);}
     56.25% {transform: translate(-50%, -50%) rotate(202.5deg) scale(1.1);}
-    62.5% {transform: translate(-50%, -50%) rotate(225deg) scale(1.2);}
+    62.5% {transform: translate(-50%, -50%) rotate(225deg) scale(1.4);}
     68.75% {transform: translate(-50%, -50%) rotate(247.5deg) scale(1.1);}
     75% {transform: translate(-50%, -50%) rotate(270deg) scale(1);}
     81.25% {transform: translate(-50%, -50%) rotate(292.5deg) scale(0.9);}
-    87.5% {transform: translate(-50%, -50%) rotate(315deg) scale(0.8);}
+    87.5% {transform: translate(-50%, -50%) rotate(315deg) scale(0.75);}
     93.75% {transform: translate(-50%, -50%) rotate(337.5deg) scale(0.9);}
     100% {transform: translate(-50%, -50%) rotate(360deg) scale(1);}
 }
