@@ -18,8 +18,11 @@
     <!--CSS End-->
 
     <!--JS Begin-->
+    <script type="text/javascript" src="script/common.js"></script>
+    <script type="text/javascript" src="script/imggalleries.js"></script>
     <script type="text/javascript" defer src="script/pageinit.js"></script>
     <script type="text/javascript" defer src="script/imgsearch.js"></script>
+    <script type="text/javascript" defer src="script/dummy.js"></script>
     <!--JS End-->
 
 </head>
@@ -51,15 +54,18 @@
     <div class="modal-content">
         <div class="modal-grid-header">
             <input type="text" id="input-text-query" style="display: inline-block; grid-column: 1 / span 4;">
-            <input type="button" data-action="search" id="button-query-search" class="small" value="Search"
+            <input type="button" data-action="search" class="small" value="Search"
                    style="display: inline-block; grid-column: 5 / span 2;">
-            <input type="button" data-action="closeModal" class="close" id="buttonCloseModal" value="close">
-            <input type="button" data-action="pagePrev" id="previous-images-page" class="small" value="Previous"
-                   style="display: inline-block; grid-column: 1 / span 2;">
-            <input type="button" data-action="commitSelected" id="selected-images-confirm" class="small"
-                   value="Confirm selected" style="display: inline-block; grid-column: 3 / span 2;">
-            <input type="button" data-action="pageNext" id="next-images-page" class="small" value="Next"
-                   style="display: inline-block; grid-column: 5 / span 2;">
+            <input type="button" data-action="closeModal" class="close" value="close">
+
+            <input type="button" data-action="pagePrev" class="small" value="Previous"
+                   style="display: inline-block; grid-column: 1 / span 2; grid-row: 2 / span 2; height: 100%;">
+            <input type="button" data-action="clearSelected" class="small"
+                   value="Clear all selected" style="display: inline-block; grid-column: 3 / span 2; grid-row: 2">
+            <input type="button" data-action="commitSelected" class="small"
+                   value="Confirm selected" style="display: inline-block; grid-column: 3 / span 2; grid-row: 3">
+            <input type="button" data-action="pageNext" class="small" value="Next"
+                   style="display: inline-block; grid-column: 5 / span 2; grid-row: 2 / span 2; height: 100%;">
         </div>
         <div class="modal-grid-images" id="pic-container-modal">
         </div>

@@ -5,13 +5,11 @@ let mainDOMElements = {
     main: {
         btn: document.getElementById("button"),
         btnOpenLoader: document.getElementById('buttonOpenLoader'),
+        picContainer: document.getElementById('pic-container-main'),
     },
     modal: {
         screen: document.getElementById("modal"),
         inputTextSearch: document.getElementById('input-text-query'),
-        buttonSearchNext: document.getElementById('next-images-page'),
-        buttonSearch: document.getElementById('button-query-search'),
-        buttonCloseModalScreen: document.getElementById("buttonCloseModal"),
         imgGridContainer: document.getElementById('pic-container-modal'),
     },
     loaderScreen: document.getElementById("loading-container"),
@@ -31,7 +29,7 @@ class ModalInputElementsControll {
         nextSearch();
     }
 
-    pagePrev(){
+    pagePrev() {
         prevSearch();
     }
 
@@ -39,9 +37,16 @@ class ModalInputElementsControll {
         mainDOMElements.modal.screen.style.display = 'none';
     }
 
-    commitSelected(){
-        alert('selection Commit');
+    commitSelected() {
+        // alert(`Commit selected\nSelected: ${selectedImgModal.size}`);
+        galleriesCollection.lastAccessed.addImages(selectedImgModal);
+        showGallery(galleriesCollection.lastAccessed);
+        selectedImgModal.dispatchCustomEvent('clear');
         mainDOMElements.modal.screen.style.display = 'none';
+    }
+
+    clearSelected() {
+        selectedImgModal.dispatchCustomEvent('clear');
     }
 
     onClick(event) {
