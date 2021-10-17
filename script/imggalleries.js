@@ -47,12 +47,13 @@ let galleriesCollection = new GalleriesCollection();
 galleriesCollection.setAndGet('default', GallerySet, {
     nameToSet: 'default',
     icon: 'bug_report',
-    description: 'Dummy gallery for tests'
+    description: 'Dummy gallery for tests',
 });
 
 //------------------------------------------------------------------------------------------
 class ImageHandleObject {
     #image = null;
+    imageUrl = null;
 
     constructor({
                     url = null,
@@ -63,22 +64,22 @@ class ImageHandleObject {
                 } = {}) {
 
         if (!url && !imageElement) throw new Error('Empty url and Image DOM element');
-        this.imageUrl = url;
+
         if (imageElement) {
-            this.#image = imageElement;
+            // Object.assign(this.#image = new ImageExtended(), imageElement);
             this.imageUrl = imageElement.src;
-        }
+        } else this.imageUrl = url;
         this.created = created ?? new Date();
         this.position = position ?? (parentGallery) ? parentGallery.getNextPosition() : null;
     }
 
     get imageElement() {
-        if (this.#image?.complete) return this.#image;
-        else {
-            this.#image = new ImageExtended();
+        if (!this.#image?.complete) {
+            this.#image = new ImageExtended().setSRC(this.imageUrl);
             this.#image.setAttribute('loading', 'lazy');
-            this.#image.alt = 'pic/brokenimage.png';
+            this.#image.alt = '..pic/brokenimage.png';
         }
+        return this.#image;
     }
 }
 
@@ -88,8 +89,9 @@ function showGallery(gallery) {
     if (!gallery) return;
     mainDOMElements.main.picContainer.innerHTML = '';
     gallery.forEach(imgHandle => {
-        let div = document.createElement('div');
-        div.appendChild(imgHandle.imageElement);
-        mainDOMElements.main.picContainer.appendChild(div);
+        // let div = document.createElement('div');
+        // div.appendChild(imgHandle.imageElement);
+        // mainDOMElements.main.picContainer.appendChild(div);
+        mainDOMElements.main.picContainer.appendChild(imgHandle.imageElement);
     });
 }

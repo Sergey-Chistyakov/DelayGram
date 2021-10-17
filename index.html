@@ -3,18 +3,19 @@
 <head>
     <title>DelayGram</title>
 
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <!--CSS Begin-->
-    <link type="text/css" rel="stylesheet" href="css/style.css">
-    <link type="text/css" rel="stylesheet" href="css/grid.css">
-    <link type="text/css" rel="stylesheet" href="css/modal.css">
-    <link type="text/css" rel="stylesheet" href="css/flex.css">
-    <link type="text/css" rel="stylesheet" href="css/input.css">
-    <link type="text/css" rel="stylesheet" href="css/lightbox.css">
-    <link type="text/css" rel="stylesheet" href="css/loading.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="css/grid.css"/>
+    <link type="text/css" rel="stylesheet" href="css/modal.css"/>
+    <link type="text/css" rel="stylesheet" href="css/flex.css"/>
+    <link type="text/css" rel="stylesheet" href="css/input.css"/>
+    <link type="text/css" rel="stylesheet" href="css/lightbox.css"/>
+    <link type="text/css" rel="stylesheet" href="css/loading.css"/>
+    <link type="text/css" rel="stylesheet" href="css/mainmenue.css"/>
     <!--CSS End-->
 
     <!--JS Begin-->
@@ -24,7 +25,6 @@
     <script type="text/javascript" defer src="script/imgsearch.js"></script>
     <script type="text/javascript" defer src="script/dummy.js"></script>
     <!--JS End-->
-
 </head>
 <body>
 <!-- loading screen Begin -->
@@ -53,45 +53,141 @@
 <div id="modal" class="modal-container">
     <div class="modal-content">
         <div class="modal-grid-header">
-            <input type="text" id="input-text-query" style="display: inline-block; grid-column: 1 / span 4;">
-            <input type="button" data-action="search" class="small" value="Search"
-                   style="display: inline-block; grid-column: 5 / span 2;">
-            <input type="button" data-action="closeModal" class="close" value="close">
+            <input
+                    type="text"
+                    id="input-text-query"
+                    style="display: inline-block; grid-column: 1 / span 4"
+            />
+            <input
+                    type="button"
+                    data-action="search"
+                    class="small"
+                    value="Search"
+                    style="display: inline-block; grid-column: 5 / span 2"
+            />
+            <input
+                    type="button"
+                    data-action="closeModal"
+                    class="close"
+                    value="close"
+            />
 
-            <input type="button" data-action="pagePrev" class="small" value="Previous"
-                   style="display: inline-block; grid-column: 1 / span 2; grid-row: 2 / span 2; height: 100%;">
-            <input type="button" data-action="clearSelected" class="small"
-                   value="Clear all selected" style="display: inline-block; grid-column: 3 / span 2; grid-row: 2">
-            <input type="button" data-action="commitSelected" class="small"
-                   value="Confirm selected" style="display: inline-block; grid-column: 3 / span 2; grid-row: 3">
-            <input type="button" data-action="pageNext" class="small" value="Next"
-                   style="display: inline-block; grid-column: 5 / span 2; grid-row: 2 / span 2; height: 100%;">
+            <input
+                    type="button"
+                    data-action="pagePrev"
+                    class="small"
+                    value="Previous"
+                    style="
+              display: inline-block;
+              grid-column: 1 / span 2;
+              grid-row: 2 / span 2;
+              height: 100%;
+            "
+            />
+            <input
+                    type="button"
+                    data-action="clearSelected"
+                    class="small"
+                    value="Clear all selected"
+                    style="display: inline-block; grid-column: 3 / span 2; grid-row: 2"
+            />
+            <input
+                    type="button"
+                    data-action="commitSelected"
+                    class="small"
+                    value="Confirm selected"
+                    style="display: inline-block; grid-column: 3 / span 2; grid-row: 3"
+            />
+            <input
+                    type="button"
+                    data-action="pageNext"
+                    class="small"
+                    value="Next"
+                    style="
+              display: inline-block;
+              grid-column: 5 / span 2;
+              grid-row: 2 / span 2;
+              height: 100%;
+            "
+            />
         </div>
-        <div class="modal-grid-images" id="pic-container-modal">
-        </div>
+        <div class="modal-grid-images" id="pic-container-modal"></div>
     </div>
 </div>
 <!-- modal-container End -->
 <!-- main-container Begin -->
 <div class="grid-container">
     <!-- header -->
-    <div class="item-header" id="header">
-    </div>
+    <div class="item-header" id="header"></div>
     <!-- Menu -->
     <div class="item-menu" id="menu">
+        <div class="logo-menu">
+            <div class="logo-pic">
+                <div class="logo-pic-border">
+                    <div class="logo-pic-circle">stream</div>
+                    <div class="logo-pic-smile">sentiment_very_dissatisfied</div>
+                </div>
+            </div>
+            <div class="logo-name">Delaygramm</div>
+            <div class="logo-slogan">"We take care of you to wait more"</div>
+        </div>
+        <ul>
+            <li>
+            <span style="font-family: 'Material Icons'; font-size: 24pt">
+              bug_report
+            </span>
+                Добавить изображения
+            </li>
+            <li>
+                <div style="font-family: 'Material Icons'; font-size: 24pt">
+                    bug_report
+                </div>
+                <div>Вид: полный_экран</div>
+            </li>
+            <li>
+                <div style="font-family: 'Material Icons'; font-size: 24pt">
+                    bug_report
+                </div>
+                <div>Вид: маленькие_значки</div>
+            </li>
+            <li>
+                <div style="font-family: 'Material Icons'; font-size: 24pt">
+                    search
+                </div>
+                <div>Поиск галлереи</div>
+            </li>
+        </ul>
+        <ul>
+            <li>Gallery 1</li>
+            <li>Gallery 2</li>
+            <li>Gallery 3</li>
+            <li>Gallery 4</li>
+        </ul>
     </div>
     <!-- Main -->
     <div class="item-main" id="main">
-        <input type="button" id="button" value="Find and add Image" class="large">
-        <input type="button" id="buttonOpenLoader" value="Load loader" class="large">
+        <input
+                type="button"
+                id="button"
+                value="Find and add Image"
+                class="large"
+        />
+        <input
+                type="button"
+                id="buttonOpenLoader"
+                value="Load loader"
+                class="large"
+        />
         <div id="pic-container-main" class="flex-container">
-            <div id="PicPlace">First thing</div>
+            <div>First thing</div>
             <div>Other thing</div>
             <div>Third thing</div>
         </div>
     </div>
     <!-- Footer -->
-    <div class="item-footer" id="footer" style="color: black;">Sergey Chistyakov<br>2021</div>
+    <div class="item-footer" id="footer" style="color: black">
+        Sergey Chistyakov<br/>2021
+    </div>
 </div>
 <!-- main-container End -->
 </body>
