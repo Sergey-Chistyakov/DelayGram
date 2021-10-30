@@ -1,5 +1,6 @@
 div.item-menu {
     background-color: var(--color-elements-1);
+    border-radius: var(--border-radius);
 }
 
 div.item-menu > ul {
@@ -11,11 +12,27 @@ div.item-menu > ul {
 }
 
 div.item-menu > ul > li {
+    padding: 2px 2px 2px 5px;
+    border-radius: var(--border-radius);
     display: flex;
     align-items: center;
     flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: flex-start;
+    margin-bottom: 3px;
+    cursor: pointer;
+}
+
+div.item-menu > ul > li:hover {
+    background-color: var(--color-elements-2);
+}
+
+div.item-menu > ul > li:last-child {
+    margin-bottom: 0px;
+}
+
+div.item-menu > ul > li > span {
+    margin-right: 3px;
+    font-size: 26pt;
+    font-family: "Material Icons";
 }
 
 /*logo-------------------------------------------------------------*/
@@ -35,9 +52,9 @@ div.logo-pic {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(45deg,  var(--color-elements-2),
-                                        var(--color-elements-4),
-                                        var(--color-elements-3));
+    background: linear-gradient(45deg, var(--color-elements-2),
+    var(--color-elements-4),
+    var(--color-elements-3));
     border-radius: 20%;
 }
 

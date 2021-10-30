@@ -1,11 +1,12 @@
 input[type=button] {
-    display: block;
+    /*display: block;*/
     background: var(--color-elements-1);
     color: var(--main-text-color-light);
     border: 2px solid var(--main-text-color-light);
     border-radius: var(--border-radius);
     height: 34px;
     width: 100%;
+    transition: background-color 0.3s linear;
 }
 
 input[type=button]:hover,
@@ -20,20 +21,20 @@ input[type=button].large {
 }
 
 input[type=button].close {
+    padding: 0;
+    margin: 0;
+    border:none;
     font-family: 'Material Icons';
     color: black;
     font-size: 32px;
     font-weight: bold;
     background: transparent;
-    border: none;
-    box-shadow: none;
-
+    user-focus: none;
 }
 
 input[type=button].close:hover,
 input[type=button].close:focus {
     color: white;
-    text-decoration: none;
     cursor: pointer;
 }
 

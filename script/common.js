@@ -78,8 +78,9 @@ class MapExtended extends Map {
 }
 
 function domElementMixIn(objForMixIn) {
-
     if (!objForMixIn instanceof Element) return null;
+    if ('mixedinDOM' in objForMixIn) return objForMixIn;
+
     Object.defineProperties(objForMixIn, {
 
         'setPropertiesValues': {
@@ -117,9 +118,13 @@ function domElementMixIn(objForMixIn) {
         },
 
         'activated': {
-            set: function (setActive = true) {
-                this.setAttribute('active', setActive.toString());
+            set: function (activeAttrStatus) {
+                this.setAttribute('active', activeAttrStatus.toString());
             },
+        },
+
+        'mixedinDOM': {
+            value: true,
         },
     });
 
@@ -127,6 +132,9 @@ function domElementMixIn(objForMixIn) {
 }
 
 function objectMixIn(objForMixIn) {
+
+    if ('mixedinObject' in objForMixIn) return objForMixIn;
+
     Object.defineProperties(objForMixIn, {
 
         'setPropertiesValues': {
@@ -179,6 +187,16 @@ function objectMixIn(objForMixIn) {
             }
         },
 
+        'checkCustomEventListner': {
+            value: function (eventName) {
+                if (!eventName || eventName.replace(/\s/ig, '').length < 1 || !(`on_${eventName}` in this)) return;
+                return this[`on_${eventName}`].has(eventName);
+            }
+        },
+
+        'mixedinObj': {
+            value: true,
+        },
     });
     return objForMixIn;
 }

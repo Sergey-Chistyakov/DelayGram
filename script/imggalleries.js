@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 //------------------------------------------------------------------------------------------
 class GalleriesCollection extends MapExtended {
@@ -10,21 +10,28 @@ class GalleriesCollection extends MapExtended {
 
 //------------------------------------------------------------------------------------------
 class GallerySet extends Set {
-    constructor({nameToSet = null, icon = 'help_center', description = ''} = {}) {
-        if (!nameToSet) throw new Error('Name is undefined or null');
-        if (`gallery_${nameToSet}` in galleriesCollection) throw new Error('Gallery already exists');
+    constructor({
+                    nameToSet = null,
+                    icon = "help_center",
+                    description = "",
+                } = {}) {
+        if (!nameToSet) throw new Error("Name is undefined or null");
+        if (`gallery_${nameToSet}` in galleriesCollection)
+            throw new Error("Gallery already exists");
         super();
         objectMixIn(this);
         this.icon = icon;
         this.desc = description;
         this.created = new Date();
-        galleriesCollection.set(nameToSet, this);
     }
 
     addImages(imageCollection) {
-        imageCollection.forEach(img => {
+        if (!imageCollection) return;
+        imageCollection.forEach((img) => {
             try {
-                this.add(new ImageHandleObject({imageElement: img, parentGallery: this}));
+                this.add(
+                    new ImageHandleObject({imageElement: img, parentGallery: this})
+                );
             } catch (e) {
                 console.log(`${e}\n${img.src}`);
             }
@@ -32,11 +39,18 @@ class GallerySet extends Set {
     }
 
     addURL(urlCollection) {
-
+        if (!urlCollection) return;
+        urlCollection.forEach((imageURL) => {
+            try {
+                this.add(new ImageHandleObject({url: imageURL, parentGallery: this}));
+            } catch (e) {
+                console.log(`${e}\n${img.src}`);
+            }
+        });
     }
 
     getNextPosition() {
-        let positionArray = Array.from(this).map(value => value.position);
+        let positionArray = Array.from(this).map((value) => value.position);
         positionArray.push(0);
         return Math.max(...positionArray) + 1;
     }
@@ -44,10 +58,10 @@ class GallerySet extends Set {
 
 //--Main Map with galleries-----------------------------------------------------------------
 let galleriesCollection = new GalleriesCollection();
-galleriesCollection.setAndGet('default', GallerySet, {
-    nameToSet: 'default',
-    icon: 'bug_report',
-    description: 'Dummy gallery for tests',
+galleriesCollection.setAndGet("default", GallerySet, {
+    nameToSet: "default",
+    icon: "bug_report",
+    description: "Dummy gallery for tests",
 });
 
 //------------------------------------------------------------------------------------------
@@ -62,22 +76,22 @@ class ImageHandleObject {
                     position = null,
                     parentGallery = null,
                 } = {}) {
-
-        if (!url && !imageElement) throw new Error('Empty url and Image DOM element');
+        if (!url && !imageElement)
+            throw new Error("Empty url and Image DOM element");
 
         if (imageElement) {
-            // Object.assign(this.#image = new ImageExtended(), imageElement);
             this.imageUrl = imageElement.src;
         } else this.imageUrl = url;
         this.created = created ?? new Date();
-        this.position = position ?? (parentGallery) ? parentGallery.getNextPosition() : null;
+        this.position =
+            position ?? parentGallery ? parentGallery.getNextPosition() : null;
     }
 
     get imageElement() {
         if (!this.#image?.complete) {
             this.#image = new ImageExtended().setSRC(this.imageUrl);
-            this.#image.setAttribute('loading', 'lazy');
-            this.#image.alt = '..pic/brokenimage.png';
+            this.#image.setAttribute("loading", "lazy");
+            this.#image.alt = "..pic/brokenimage.png";
         }
         return this.#image;
     }
@@ -87,8 +101,8 @@ class ImageHandleObject {
 // todo not perfect, rewrite
 function showGallery(gallery) {
     if (!gallery) return;
-    mainDOMElements.main.picContainer.innerHTML = '';
-    gallery.forEach(imgHandle => {
+    mainDOMElements.main.picContainer.innerHTML = "";
+    gallery.forEach((imgHandle) => {
         // let div = document.createElement('div');
         // div.appendChild(imgHandle.imageElement);
         // mainDOMElements.main.picContainer.appendChild(div);

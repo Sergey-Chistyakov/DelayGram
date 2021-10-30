@@ -3,9 +3,8 @@
 //---------------------------------------------------------------------------------------------------------------------
 let mainDOMElements = {
     main: {
-        btn: document.getElementById("button"),
-        btnOpenLoader: document.getElementById('buttonOpenLoader'),
         picContainer: document.getElementById('pic-container-main'),
+        menu: document.getElementById("menu"),
     },
     modal: {
         screen: document.getElementById("modal"),
@@ -14,6 +13,8 @@ let mainDOMElements = {
     },
     loaderScreen: document.getElementById("loading-container"),
 };
+
+objectMixIn(mainDOMElements.modal);
 
 //---------------------------------------------------------------------------------------------------------------------
 class ModalInputElementsControll {
@@ -35,14 +36,15 @@ class ModalInputElementsControll {
 
     closeModal() {
         mainDOMElements.modal.screen.style.display = 'none';
+        mainDOMElements.modal.dispatchCustomEvent('hide');
     }
 
     commitSelected() {
-        // alert(`Commit selected\nSelected: ${selectedImgModal.size}`);
         galleriesCollection.lastAccessed.addImages(selectedImgModal);
         showGallery(galleriesCollection.lastAccessed);
         selectedImgModal.dispatchCustomEvent('clear');
         mainDOMElements.modal.screen.style.display = 'none';
+        mainDOMElements.modal.dispatchCustomEvent('hide');
     }
 
     clearSelected() {
@@ -57,19 +59,43 @@ class ModalInputElementsControll {
     };
 }
 
+
+class MenuInputElementsControll {
+    constructor(elem) {
+        elem.onclick = this.onClick.bind(this);
+    }
+
+    addImages() {
+        mainDOMElements.modal.screen.style.display = "block";
+        mainDOMElements.modal.dispatchCustomEvent('show');
+    }
+
+    imageViewFull() {
+        mainDOMElements.main.picContainer.dataset.imageSize = 'full';
+    }
+
+    imageViewLarge() {
+        mainDOMElements.main.picContainer.dataset.imageSize = 'row_large';
+    }
+
+    imageViewMedium() {
+        mainDOMElements.main.picContainer.dataset.imageSize = 'row_medium';
+    }
+
+    imageViewSmall() {
+        mainDOMElements.main.picContainer.dataset.imageSize = 'row_small';
+    }
+
+    onClick(event) {
+        let action = event.target.dataset.action;
+        if (action) {
+            this[action]();
+        }
+    };
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 new ModalInputElementsControll(mainDOMElements.modal.screen);
-
+new MenuInputElementsControll(mainDOMElements.main.menu);
 
 //---------------------------------------------------------------------------------------------------------------------
-mainDOMElements.main.btn.onclick = function () {
-    mainDOMElements.modal.screen.style.display = "block";
-}
-
-mainDOMElements.main.btnOpenLoader.onclick = function () {
-    mainDOMElements.loaderScreen.style.display = 'block';
-}
-
-mainDOMElements.loaderScreen.onclick = function () {
-    mainDOMElements.loaderScreen.style.display = 'none';
-}

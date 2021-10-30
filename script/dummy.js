@@ -16,3 +16,6 @@ for (let imageUrl of results) {
     mainDOMElements.modal.imgGridContainer.appendChild(div.div);
     div.div.appendChild((new ImageExtended()).setSRC(imageUrl));
 }
+
+galleriesCollection.lastAccessed.addURL(results);
+showGallery(galleriesCollection.lastAccessed);

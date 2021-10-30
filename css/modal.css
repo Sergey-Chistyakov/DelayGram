@@ -146,3 +146,8 @@
 .modal-grid-images > div > div.selectionMark[active=false] {
     opacity: 0;
 }
+
+.modal-grid-images > div > div.selectionMark[active=locked] {
+    opacity: 0.5;
+    background-color: var(--color-elements-3);
+}

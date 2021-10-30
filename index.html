@@ -24,6 +24,8 @@
     <script type="text/javascript" defer src="script/pageinit.js"></script>
     <script type="text/javascript" defer src="script/imgsearch.js"></script>
     <script type="text/javascript" defer src="script/dummy.js"></script>
+    <script type="text/javascript" defer src="script/testdummy.js"></script>
+
     <!--JS End-->
 </head>
 <body>
@@ -132,29 +134,35 @@
             <div class="logo-slogan">"We take care of you to wait more"</div>
         </div>
         <ul>
-            <li>
-            <span style="font-family: 'Material Icons'; font-size: 24pt">
-              bug_report
+            <li data-action="addImages">
+            <span>
+                note_add
             </span>
-                Добавить изображения
+                Find and add images to gallery
             </li>
-            <li>
-                <div style="font-family: 'Material Icons'; font-size: 24pt">
-                    bug_report
-                </div>
-                <div>Вид: полный_экран</div>
+            <li data-action="imageViewFull">
+                <span>
+                    fit_screen
+                </span>
+                Image View: Fit
             </li>
-            <li>
-                <div style="font-family: 'Material Icons'; font-size: 24pt">
-                    bug_report
-                </div>
-                <div>Вид: маленькие_значки</div>
+            <li data-action="imageViewLarge">
+                <span>
+                    photo_size_select_actual
+                </span>
+                Image View: Large
             </li>
-            <li>
-                <div style="font-family: 'Material Icons'; font-size: 24pt">
-                    search
-                </div>
-                <div>Поиск галлереи</div>
+            <li data-action="imageViewMedium">
+                <span>
+                    photo_size_select_large
+                </span>
+                Image View: Medium
+            </li>
+            <li data-action="imageViewSmall">
+                <span>
+                    photo_size_select_small
+                </span>
+                Image View: Small
             </li>
         </ul>
         <ul>
@@ -166,22 +174,7 @@
     </div>
     <!-- Main -->
     <div class="item-main" id="main">
-        <input
-                type="button"
-                id="button"
-                value="Find and add Image"
-                class="large"
-        />
-        <input
-                type="button"
-                id="buttonOpenLoader"
-                value="Load loader"
-                class="large"
-        />
-        <div id="pic-container-main" class="flex-container">
-            <div>First thing</div>
-            <div>Other thing</div>
-            <div>Third thing</div>
+        <div id="pic-container-main" class="flex-container" data-image-size="full">
         </div>
     </div>
     <!-- Footer -->
