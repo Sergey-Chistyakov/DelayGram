@@ -17,7 +17,7 @@ let mainDOMElements = {
 objectMixIn(mainDOMElements.modal);
 
 //---------------------------------------------------------------------------------------------------------------------
-class ModalInputElementsControll {
+class ModalInputElementsControl {
     constructor(elem) {
         elem.onclick = this.onClick.bind(this);
     }
@@ -60,7 +60,7 @@ class ModalInputElementsControll {
 }
 
 
-class MenuInputElementsControll {
+class MenuInputElementsControl {
     constructor(elem) {
         elem.onclick = this.onClick.bind(this);
     }
@@ -95,7 +95,7 @@ class MenuInputElementsControll {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-new ModalInputElementsControll(mainDOMElements.modal.screen);
-new MenuInputElementsControll(mainDOMElements.main.menu);
+new ModalInputElementsControl(mainDOMElements.modal.screen);
+new MenuInputElementsControl(mainDOMElements.main.menu);
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <title>Test</title>
 
-    <link type="text/css" rel="stylesheet" href="css/style.css">
-
-    <script type="text/javascript" src="script/common.js"></script>
-    <script type="text/javascript" src="script/imggalleries.js"></script>
-    <script type="text/javascript" src="script/dummy.js"></script>
+    <script type="text/javascript" src="script/promisedindexdb.js"></script>
 
 
     <style>
@@ -17,7 +13,7 @@
         }
 
         * {
-            color: black;
+            color: white;
         }
     </style>
 </head>
@@ -28,16 +24,4 @@
 </body>
 </html>
 <script>
-    try {
-        let img1 = new ImageHandleObject({url: 'somefalseURL'});
-        let img2 = new ImageHandleObject({url: results[0]});
-            // document.body.appendChild(img1.image);
-           setTimeout(()=>{document.body.appendChild(img2.image)},10000);
-    } catch (error) {
-        console.log(`${error}`);
-        if ('cause' in error) console.log(`Cause: ${error.cause}`);
-    }
-
-
-
 </script>
