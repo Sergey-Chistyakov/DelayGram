@@ -52,6 +52,7 @@ class ImageExtended extends Image {
 
 class MapExtended extends Map {
     #lastAcc = null;
+
     constructor() {
         super();
     }
@@ -199,6 +200,10 @@ function objectMixIn(objForMixIn) {
         },
     });
     return objForMixIn;
+}
+
+function getCallerFunctionName() {
+    return new Error('dummy').stack.match(/at (\S+)/g)[1].slice(3);
 }
 
 //------------------------------------------------------------------------------------------
