@@ -1,12 +1,38 @@
-/*
-1. id = gallery + url
-3. generalErrorHandler - for non-abort query errors
-
- */
 'use strict'
 
+class UnifiedPIDBRequestObject {
+    constructor(requestType, objStoreName, transaction, object, id) {
+        switch (true) {
+            case (!requestType || !objStoreName || !object):
+            case (!Array.isArray(object) && typeof object !== 'object'):
+            case (typeof objStoreName === 'string' && objStoreName.lentgth < 1):
+            case (!Array.from(Object.values(this.#REQUEST_TYPE)).includes(requestType)):
+            case (transaction && transaction instanceof IDBTransaction):
+                throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
+        }
+
+        this.requestType = requestType;
+        this.objStoreName = objStoreName;
+        this.transaction = transaction;
+        this.id = id;
+        this.object = object;
+    }
+
+    #REQUEST_TYPE = {
+        add: 'add',
+        remove: 'remove',
+        get: 'get',
+        getAll: 'getAll',
+        replace: 'replace',
+    };
+
+    get REQUEST_TYPE() {
+        return this.#REQUEST_TYPE;
+    }
+}
+
 class PromisedIndexDB {
-    // Static Methods /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+    // Static Methods and public Properties /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 
     // Private Properties /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
@@ -15,7 +41,6 @@ class PromisedIndexDB {
     #dbName = null;
     #dbVersion = null;
     #currentDB = null;
-    #transaction = null; // todo turn into ExtendedMap
 
     //todo incorrect private property accession: error occurs via dual db opening
     #versionChangeCallback = function () {
@@ -78,74 +103,68 @@ class PromisedIndexDB {
         if (!Array.isArray(storeNamesArr) || storeNamesArr.length < 1 || typeof (writeable) !== 'boolean')
             throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
 
-        if (this.#transaction
-            && 'closed' in this.#transaction
-            && !this.#transaction.closed
-            && (this.#transaction.mode == (writeable) ? 'readwrite' : 'readonly')
-            && storeNamesArr?.reduce((accumulator, currentValue) => {
-                if (accumulator === false) return false;
-                return this.#transaction.objectStoreNames.contains(currentValue);
-            }, true)) {
-            console.log('existing transaction passed'); //todo delete this
-            return this.#transaction;
-        }
-
         console.log('transaction opening');
         let transaction = this.#currentDB.transaction(storeNamesArr, (writeable) ? 'readwrite' : 'readonly');
-        transaction.closed = false;
 
         transaction.oncomplete = (event) => {
             console.log('transaction closed');
-            transaction.closed = true;
         };
         transaction.onerror = (event) => {
             console.log('transaction closed on error');
-            transaction.closed = true;
         }
-        return this.#transaction = transaction;
+        return transaction;
     }
 
     async #getObjectStore(objStoreName, writeable = false, transaction) {
         if (!(await this.getDBObjectStores()).includes(objStoreName))
             throw new Error(`ObjectSore |${objStoreName}|  not found in DB |${getCallerFunctionName()}|`);
         await this.#getDB();
-        if (!transaction)
-            transaction = await this.#getTransaction({
+        return (transaction) ? transaction.objectStore(objStoreName)
+            : (await this.#getTransaction({
                 storeNamesArr: [objStoreName],
                 writeable: writeable,
-            });
-        return transaction.objectStore(objStoreName);
+            })).objectStore(objStoreName);
+    }
+
+    #arrayfication(objectForArrayfiaction) {
+        switch (true) {
+            case (!objectForArrayfiaction):
+            case (!(typeof objectForArrayfiaction === 'object' || typeof objectForArrayfiaction === 'string') && !Array.isArray(objectForArrayfiaction)):
+            case (Array.isArray(objectForArrayfiaction) && objectForArrayfiaction.length < 1):
+            case (typeof objectForArrayfiaction === 'string' && objectForArrayfiaction.length < 1):
+                throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
+        }
+        return (Array.isArray(objectForArrayfiaction) ? objectForArrayfiaction : [objectForArrayfiaction]);
     }
 
     // Public Methods /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
-    //todo commit transaction
-    //todo use #getObjStore
-    //todo adding in multiple objstores via one transaction needed
-    async add(objStore, objToAddArr, replaceExisting = false) {
-        switch (true) {
-            case (!objStore || !objToAddArr):
-            case (typeof objToAddArr !== 'object' && !Array.isArray(objToAddArr)):
-            case (Array.isArray(objToAddArr) && objToAddArr.length < 1):
-                throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
-        }
-
-        await this.#getDB();
-        for (let element of (Array.isArray(objToAddArr) ? objToAddArr : [objToAddArr])) {
-            let storeInTrans = (await this.#getTransaction({
-                storeNamesArr: [objStore],
+    //todo return promise
+    async add({objStore, objToAddArr, replaceExisting = false, transaction} = {}) {
+        let emptyTransaction = !!transaction;
+        let promiseArr = [];
+        if (!transaction) {
+            await this.#getDB();
+            transaction = await this.#getTransaction({
+                storeNamesArr: this.#arrayfication(objStore),
                 writeable: true,
-            })).objectStore(objStore);
-
-            // this.#getObjectStore(objStore)
-            if (!replaceExisting) storeInTrans.add(element);
-            else storeInTrans.put(element);
+            });
         }
-        return this;
-    }
-
-    removeAllItemsByIndex() {
-
+        let store = await this.#getObjectStore(objStore, undefined, transaction);
+        for (let element of this.#arrayfication(objToAddArr)) {
+            let request = (replaceExisting) ? store.put(element) : store.add(element);
+            promiseArr.push(new Promise(((resolve, reject) => {
+                request.onsuccess = () => {
+                    if (emptyTransaction) request.transaction.commit();
+                    resolve();
+                }
+                request.onerror = () => {
+                    if (emptyTransaction) request.transaction.abort();
+                    reject()
+                }
+            })));
+        }
+        return Promise.all(promiseArr);
     }
 
     // todo rewrite to delete several items via array
@@ -153,20 +172,33 @@ class PromisedIndexDB {
     async removeItem(objStoreName, itemID) {
         if (!objStoreName || !itemID)
             throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
-
         let request = (await this.#getObjectStore(objStoreName, true)).delete(itemID);
         request.onsuccess = () => request.transaction.commit();
         request.onerror = () => request.transaction.abort();
     }
 
-    getAllItemsByIndex() {
+    allInOneTransaction({} = {}) {
 
     }
 
-    getAllItems() {
+    async getAllItems(objStoreName) {
+        let objStore = await this.#getObjectStore(objStoreName);
+        let request = objStore.getAll();
+        return new Promise(((resolve, reject) => {
+                request.onerror = () => {
+                    console.log('failed');
+                    reject();
+                    request.transaction.abort();
+                }
 
+                request.onsuccess = () => {
+                    request.transaction.commit();
+                    resolve(request.result);
+                }
+
+            })
+        );
     }
-
 
     async getDBObjectStores() {
         return Array.from((await this.#getDB()).objectStoreNames);
@@ -183,21 +215,29 @@ class PromisedIndexDB {
         if (this.#currentDB) this.#currentDB.close();
         indexedDB.deleteDatabase(this.#dbName);
     }
-
-
 }
 
 // Executable function-------------------------------------------------------------------------------------------------
 let pidb = new PromisedIndexDB({version: 2});
 (async () => {
     pidb.deleteDB();
-    await pidb.add('testObjStore', [
-        {id: 1, name: 'Jordan', gender: 'male',},
-        {id: 2, name: 'Damien', gender: 'male',},
-        {id: 3, name: 'Johanne', gender: 'female',}]);
-    await pidb.add('testObjStore', {id: 4, name: 'Katerina', gender: 'female',});
-    await pidb.add('testObjStore', {id: 4, name: 'Kate Replaced', gender: 'female',}, true);
-    await pidb.add('someObjStore', [{id: 5, name: 'Helen', gender: 'female',}]);
-    await pidb.clearObjStore('someObjStore');
-    await pidb.removeItem('testObjStore', 2);
+    let prom = Promise.all([pidb.add({
+        objStore: 'someObjStore',
+        objToAddArr: [{id: 1, name: 'John', gender: 'male',}],
+    }),
+        pidb.add({
+            objStore: 'someObjStore',
+            objToAddArr: [{id: 2, name: 'Mari', gender: 'female',}],
+        }),
+        pidb.add({
+            objStore: 'someObjStore',
+            objToAddArr: [{id: 3, name: 'Helen', gender: 'female',}],
+        }),]);
+    await prom;
+    let res = await pidb.getAllItems('someObjStore');
+    console.log(res.length);
+    console.log(res[0]);
+    await pidb.removeItem('someObjStore', 1);
+    res = await pidb.getAllItems('someObjStore');
+    console.log(res.length);
 })();
