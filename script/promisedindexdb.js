@@ -1,243 +1,329 @@
 'use strict'
 
 class UnifiedPIDBRequestObject {
-    constructor(requestType, objStoreName, transaction, object, id) {
-        switch (true) {
-            case (!requestType || !objStoreName || !object):
-            case (!Array.isArray(object) && typeof object !== 'object'):
-            case (typeof objStoreName === 'string' && objStoreName.lentgth < 1):
-            case (!Array.from(Object.values(this.#REQUEST_TYPE)).includes(requestType)):
-            case (transaction && transaction instanceof IDBTransaction):
-                throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
-        }
+	static REQUEST_TYPE = Object.freeze({
+		add: Symbol('add'),
+		remove: Symbol('remove'),
+		get: Symbol('get'),
+		getAll: Symbol('getAll'),
+		replace: Symbol('replace'),
+	});
 
-        this.requestType = requestType;
-        this.objStoreName = objStoreName;
-        this.transaction = transaction;
-        this.id = id;
-        this.object = object;
-    }
+	static REQUEST_TYPE_ARR = Array.from(Object.values(UnifiedPIDBRequestObject.REQUEST_TYPE));
 
-    #REQUEST_TYPE = {
-        add: 'add',
-        remove: 'remove',
-        get: 'get',
-        getAll: 'getAll',
-        replace: 'replace',
-    };
+	constructor({requestType, objStoreName, transaction, object, id} = {}) {
+		let u = UnifiedPIDBRequestObject;
+		if ((!requestType || !objStoreName || (object && typeof object !== 'object'))
+			|| (!u.REQUEST_TYPE_ARR.includes(requestType))
+			|| (typeof objStoreName === 'string' && objStoreName.lentgth < 1)
+			|| ([u.REQUEST_TYPE.remove, u.REQUEST_TYPE.replace].includes(requestType) && !id && !object)
+			|| (transaction && !transaction instanceof IDBTransaction)
+		)
+			throw new Error(`Invalid arguments |${arguments}|`);
 
-    get REQUEST_TYPE() {
-        return this.#REQUEST_TYPE;
-    }
+		this.requestType = requestType;
+		this.objStoreName = objStoreName;
+		this.transaction = transaction;
+		this.id = id;
+		this.object = object;
+	}
+
 }
 
 class PromisedIndexDB {
-    // Static Methods and public Properties /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	// Private Properties /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
+	#openRequest = null;
+	#dbName = null;
+	#dbVersion = null;
+	#currentDB = null;
+	#openDBPromise = null;
 
-    // Private Properties /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	#versionChangeCallback = function () {
+		console.log(`DB ${this.#currentDB.name} ver:${this.#currentDB.version} is closed due to VersionChange event`);
+		if (this.#currentDB) this.#currentDB.close();
+	}
 
-    #openRequest = null;
-    #dbName = null;
-    #dbVersion = null;
-    #currentDB = null;
+	#upgradeNeededCallback = function (event) {
+		let db = event.target.result;
+		switch (db.version) {
+			case 2:
+				db.createObjectStore("someObjStore", {keyPath: 'id'});
+			case 1:
+				let objectStore = db.createObjectStore("testObjStore", {keyPath: 'id'});
+				objectStore.createIndex("testIndex", "gender", {unique: false});
 
-    //todo incorrect private property accession: error occurs via dual db opening
-    #versionChangeCallback = function () {
-        console.log(`DB ${this.#currentDB.name} ver:${this.#currentDB.version} is closed due to VersionChange event`);
-        if (this.#currentDB) this.#currentDB.close();
-    }
+		}
+	}
 
-    #upgradeNeededCallback = function (event) {
-        let db = event.target.result;
-        switch (db.version) {
-            case 2:
-                db.createObjectStore("someObjStore", {keyPath: 'id'});
-            case 1:
-                let objectStore = db.createObjectStore("testObjStore", {keyPath: 'id'});
-                objectStore.createIndex("testIndex", "gender", {unique: false});
+	//todo handle non-abort query errors
+	#generalErrorHandler = function (event) {
+		console.log(`Error in ${event.target}: ${event.target.error}`);
+		throw new Error(`Error in ${event.target}: ${event.target.error}`);
+	}
 
-        }
-    }
+	constructor({dbName = 'dbTest', version = 1, upgradeNeededCallback = null, versionChangeCallback = null,} = {}) {
+		if (!dbName || dbName.length < 1) return null;
+		if (version < 1) return null;
+		if (upgradeNeededCallback) this.#upgradeNeededCallback = upgradeNeededCallback;
+		if (versionChangeCallback) this.#versionChangeCallback = versionChangeCallback;
+		this.#dbVersion = version;
+		this.#dbName = dbName;
+	}
 
-    //handle non-abort query errors
-    #generalErrorHandler = function (event) {
-        console.log(`Error in ${event.target}: ${event.target.error}`);
-        //throw new Error(`Error in ${event.target}: ${event.target.error}`);
-    }
+	#getDB() {
+		if (this.#currentDB) return Promise.resolve(this.#currentDB);
+		if (this.#openDBPromise && !this.#currentDB) return this.#openDBPromise;
+		return this.#openDBPromise = new Promise((resolve, reject) => {
+			console.log('opening getDB'); //todo delete this
+			this.#openRequest = indexedDB.open(this.#dbName, this.#dbVersion);
 
-    constructor({dbName = 'dbTest', version = 1, upgradeNeededCallback = null, versionChangeCallback = null,} = {}) {
-        if (!dbName || dbName.length < 1) return null;
-        if (version < 1) return null;
-        if (upgradeNeededCallback) this.#upgradeNeededCallback = upgradeNeededCallback;
-        if (versionChangeCallback) this.#versionChangeCallback = versionChangeCallback;
-        this.#dbVersion = version;
-        this.#dbName = dbName;
-    }
+			this.#openRequest.onupgradeneeded = this.#upgradeNeededCallback;
 
-    #getDB() {
-        if (this.#currentDB) return Promise.resolve(this.#currentDB);
-        return new Promise((resolve, reject) => {
-            console.log('opening getDB'); //todo delete this
-            this.#openRequest = indexedDB.open(this.#dbName, this.#dbVersion);
+			this.#openRequest.onerror = this.#generalErrorHandler;
 
-            this.#openRequest.onupgradeneeded = this.#upgradeNeededCallback;
+			this.#openRequest.onsuccess = (function (event) {
+				this.#currentDB = event.target.result;
+				this.#currentDB.onversionchange = this.#versionChangeCallback;
+				this.#currentDB.onerror = this.#generalErrorHandler;
+				resolve(this.#currentDB);
+			}).bind(this);
 
-            this.#openRequest.onerror = this.#generalErrorHandler;
+			this.#openRequest.onblocked = function () {
+				reject(new Error('DB is currently blocked'));
+			};
 
-            this.#openRequest.onsuccess = (function (event) {
-                this.#currentDB = event.target.result;
-                this.#currentDB.onversionchange = this.#versionChangeCallback;
-                this.#currentDB.onerror = this.#generalErrorHandler;
-                resolve(this.#currentDB);
-            }).bind(this);
+		});
+	}
 
-            this.#openRequest.onblocked = function () {
-                reject(new Error('DB is currently blocked'));
-            };
+	async #getTransaction({storeNamesArr = null, writeable = false} = {}) {
+		if (!Array.isArray(storeNamesArr) || storeNamesArr.length < 1 || typeof (writeable) !== 'boolean')
+			throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
 
-        });
-    }
+		if (!this.#currentDB) await this.#getDB();
 
-    #getTransaction({storeNamesArr = null, writeable = false} = {}) {
-        if (!Array.isArray(storeNamesArr) || storeNamesArr.length < 1 || typeof (writeable) !== 'boolean')
-            throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
+		console.log('transaction opening'); //todo delete this
+		let transaction = this.#currentDB.transaction(storeNamesArr, (writeable) ? 'readwrite' : 'readonly');
 
-        console.log('transaction opening');
-        let transaction = this.#currentDB.transaction(storeNamesArr, (writeable) ? 'readwrite' : 'readonly');
+		transaction.oncomplete = (event) => {
+			console.log('transaction closed');  //todo delete this
+		};
+		transaction.onerror = (event) => {
+			console.log('transaction closed on error'); //todo delete this
+		}
 
-        transaction.oncomplete = (event) => {
-            console.log('transaction closed');
-        };
-        transaction.onerror = (event) => {
-            console.log('transaction closed on error');
-        }
-        return transaction;
-    }
+		return Promise.resolve(transaction);
+	}
 
-    async #getObjectStore(objStoreName, writeable = false, transaction) {
-        if (!(await this.getDBObjectStores()).includes(objStoreName))
-            throw new Error(`ObjectSore |${objStoreName}|  not found in DB |${getCallerFunctionName()}|`);
-        await this.#getDB();
-        return (transaction) ? transaction.objectStore(objStoreName)
-            : (await this.#getTransaction({
-                storeNamesArr: [objStoreName],
-                writeable: writeable,
-            })).objectStore(objStoreName);
-    }
+	async #getObjectStore(objStoreName, writeable = false, transaction) {
+		if (!(await this.getDBObjectStores()).includes(objStoreName))
+			throw new Error(`ObjectSore |${objStoreName}|  not found in DB |${this.#dbName}|`);
 
-    #arrayfication(objectForArrayfiaction) {
-        switch (true) {
-            case (!objectForArrayfiaction):
-            case (!(typeof objectForArrayfiaction === 'object' || typeof objectForArrayfiaction === 'string') && !Array.isArray(objectForArrayfiaction)):
-            case (Array.isArray(objectForArrayfiaction) && objectForArrayfiaction.length < 1):
-            case (typeof objectForArrayfiaction === 'string' && objectForArrayfiaction.length < 1):
-                throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
-        }
-        return (Array.isArray(objectForArrayfiaction) ? objectForArrayfiaction : [objectForArrayfiaction]);
-    }
+		return (transaction) ? (await transaction).objectStore(objStoreName)
+			: (await this.#getTransaction({
+				storeNamesArr: [objStoreName],
+				writeable: writeable,
+			})).objectStore(objStoreName);
+	}
 
-    // Public Methods /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	#arrayfication(objectForArrayfiaction) {
+		if ((!objectForArrayfiaction)
+			|| (!['object', 'string'].includes(typeof objectForArrayfiaction) && !Array.isArray(objectForArrayfiaction))
+			|| (Array.isArray(objectForArrayfiaction) && objectForArrayfiaction.length < 1)
+			|| (typeof objectForArrayfiaction === 'string' && objectForArrayfiaction.length < 1))
+			throw new Error(`Invalid arguments |${objectForArrayfiaction}|`);
 
-    //todo return promise
-    async add({objStore, objToAddArr, replaceExisting = false, transaction} = {}) {
-        let emptyTransaction = !!transaction;
-        let promiseArr = [];
-        if (!transaction) {
-            await this.#getDB();
-            transaction = await this.#getTransaction({
-                storeNamesArr: this.#arrayfication(objStore),
-                writeable: true,
-            });
-        }
-        let store = await this.#getObjectStore(objStore, undefined, transaction);
-        for (let element of this.#arrayfication(objToAddArr)) {
-            let request = (replaceExisting) ? store.put(element) : store.add(element);
-            promiseArr.push(new Promise(((resolve, reject) => {
-                request.onsuccess = () => {
-                    if (emptyTransaction) request.transaction.commit();
-                    resolve();
-                }
-                request.onerror = () => {
-                    if (emptyTransaction) request.transaction.abort();
-                    reject()
-                }
-            })));
-        }
-        return Promise.all(promiseArr);
-    }
+		return (Array.isArray(objectForArrayfiaction) ? objectForArrayfiaction : [objectForArrayfiaction]);
+	}
 
-    // todo rewrite to delete several items via array
-    // todo check if transaction commit works properly
-    async removeItem(objStoreName, itemID) {
-        if (!objStoreName || !itemID)
-            throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
-        let request = (await this.#getObjectStore(objStoreName, true)).delete(itemID);
-        request.onsuccess = () => request.transaction.commit();
-        request.onerror = () => request.transaction.abort();
-    }
+	// Public Methods /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
+	//todo all methods must return null or result
 
-    allInOneTransaction({} = {}) {
+	async add({objStoreName, object, replaceExisting = false, transaction} = {}) {
+		if (!transaction) {
+			if (!this.#currentDB) await this.#getDB();
+			transaction = await this.#getTransaction({
+				storeNamesArr: this.#arrayfication(objStoreName),
+				writeable: true,
+			});
+		}
+		let store = transaction.objectStore(objStoreName);
+		let request = (replaceExisting) ? store.put(object) : store.add(object);
+		return new Promise(((resolve, reject) => {
+			request.onsuccess = () => {
+				if (!transaction) request.transaction.commit();
+				resolve(null);
+			}
+			request.onerror = () => {
+				request.transaction.abort();
+				reject();
+			}
+		}));
+	}
 
-    }
+	async removeItem({objStoreName, id, object, transaction} = {}) {
+		if (!objStoreName || (!id || !object))
+			throw new Error(`Invalid arguments |${arguments}|`);
 
-    async getAllItems(objStoreName) {
-        let objStore = await this.#getObjectStore(objStoreName);
-        let request = objStore.getAll();
-        return new Promise(((resolve, reject) => {
-                request.onerror = () => {
-                    console.log('failed');
-                    reject();
-                    request.transaction.abort();
-                }
+		let objStore = await this.#getObjectStore(objStoreName, true);
+		let request = objStore.delete(id ?? object[objStore.keyPath]);
+		request.onsuccess = (resolve, reject) => {
+			if (!transaction) request.transaction.commit();
+			resolve(null);
+		};
+		request.onerror = (resolve, reject) => {
+			request.transaction.abort();
+			reject();
+		};
+	}
 
-                request.onsuccess = () => {
-                    request.transaction.commit();
-                    resolve(request.result);
-                }
+	// Allow using callback functions
+	async allInOneTransaction(uObjArr) {
+		if (!uObjArr || !Array.isArray(uObjArr) || uObjArr.length < 1)
+			throw new Error(`Invalid arguments |${uObjArr}|`);
 
-            })
-        );
-    }
+		let objStoreNamesSet = new Set();
+		let writeable = false;
 
-    async getDBObjectStores() {
-        return Array.from((await this.#getDB()).objectStoreNames);
-    }
+		for (let uniObj of uObjArr) {
+			objStoreNamesSet.add(uniObj.objStoreName);
+			if (!writeable && (uniObj.requestType === UnifiedPIDBRequestObject.REQUEST_TYPE.add
+				|| uniObj.requestType === UnifiedPIDBRequestObject.REQUEST_TYPE.replace
+				|| uniObj.requestType === UnifiedPIDBRequestObject.REQUEST_TYPE.remove))
+				writeable = true;
+		}
 
-    //todo return promise
-    async clearObjStore(objStoreName) {
-        let request = (await this.#getObjectStore(objStoreName, true)).clear();
-        request.onsuccess = () => request.transaction.commit();
-        request.onerror = () => request.transaction.abort();
-    }
+		let trans = await this.#getTransaction({
+			storeNamesArr: Array.from(objStoreNamesSet),
+			writeable: writeable,
+		});
 
-    deleteDB() {
-        if (this.#currentDB) this.#currentDB.close();
-        indexedDB.deleteDatabase(this.#dbName);
-    }
+		for (let uniObj of uObjArr) {
+			uniObj.transaction = trans;
+			switch (uniObj.requestType) {
+				case UnifiedPIDBRequestObject.REQUEST_TYPE.add:
+					uniObj.result = await this.add(uniObj);
+					break;
+				case UnifiedPIDBRequestObject.REQUEST_TYPE.replace:
+					uniObj.replaceExisting = true;
+					uniObj.result = await this.add(uniObj);
+					break;
+				case UnifiedPIDBRequestObject.REQUEST_TYPE.remove:
+					uniObj.result = await this.removeItem(uniObj);
+					break;
+				case UnifiedPIDBRequestObject.REQUEST_TYPE.getAll:
+					uniObj.result = await this.getAllItems(uniObj);
+					break;
+			}
+		}
+		trans.commit();
+	}
+
+	async getAllItems({objStoreName, transaction} = {}) {
+		let objStore = (transaction ?? await this.#getTransaction({
+			storeNamesArr: this.#arrayfication(objStoreName),
+			writeable: false
+		})).objectStore(objStoreName);
+		let request = objStore.getAll();
+		return new Promise(((resolve, reject) => {
+				request.onerror = () => {
+					request.transaction.abort();
+					reject();
+				}
+
+				request.onsuccess = () => {
+					if (!transaction) request.transaction.commit();
+					resolve(request.result);
+				}
+
+			})
+		);
+	}
+
+	async getDBObjectStores() {
+		return Promise.resolve(Array.from(((this.#currentDB) ?? (await this.#getDB())).objectStoreNames));
+	}
+
+//todo return promise
+//todo get transaction as an argument
+	async clearObjStore(objStoreName) {
+		let request = (await this.#getObjectStore(objStoreName, true)).clear();
+		request.onsuccess = () => request.transaction.commit();
+		request.onerror = () => request.transaction.abort();
+	}
+
+	deleteDB() {
+		if (this.#currentDB) this.#currentDB.close();
+		indexedDB.deleteDatabase(this.#dbName);
+	}
 }
 
 // Executable function-------------------------------------------------------------------------------------------------
-let pidb = new PromisedIndexDB({version: 2});
-(async () => {
-    pidb.deleteDB();
-    let prom = Promise.all([pidb.add({
-        objStore: 'someObjStore',
-        objToAddArr: [{id: 1, name: 'John', gender: 'male',}],
-    }),
-        pidb.add({
-            objStore: 'someObjStore',
-            objToAddArr: [{id: 2, name: 'Mari', gender: 'female',}],
-        }),
-        pidb.add({
-            objStore: 'someObjStore',
-            objToAddArr: [{id: 3, name: 'Helen', gender: 'female',}],
-        }),]);
-    await prom;
-    let res = await pidb.getAllItems('someObjStore');
-    console.log(res.length);
-    console.log(res[0]);
-    await pidb.removeItem('someObjStore', 1);
-    res = await pidb.getAllItems('someObjStore');
-    console.log(res.length);
-})();
+// let pidb = new PromisedIndexDB({version: 2});
+// (async () => {
+// 	pidb.deleteDB();
+//
+// 	let requestsArr = [];
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
+// 		objStoreName: 'testObjStore',
+// 		transaction: null,
+// 		object: {id: 1, name: 'AlienSpecies', gender: 'undefined'},
+// 		id: null,
+// 	}));
+//
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
+// 		objStoreName: 'testObjStore',
+// 		transaction: null,
+// 		object: {id: 2, name: 'John', gender: 'male'},
+// 		id: null,
+// 	}));
+//
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
+// 		objStoreName: 'testObjStore',
+// 		object: {id: 3, name: 'Anna', gender: 'female'},
+// 	}));
+//
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
+// 		objStoreName: 'testObjStore',
+// 		object: {id: 4, name: 'Helen', gender: 'female'},
+// 	}));
+//
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.getAll,
+// 		objStoreName: 'testObjStore',
+// 	}));
+//
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.replace,
+// 		objStoreName: 'testObjStore',
+// 		object: {id: 1, name: 'German', gender: 'male'},
+// 	}));
+//
+// 	requestsArr.push(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.getAll,
+// 		objStoreName: 'testObjStore',
+// 	}));
+//
+// 	await pidb.allInOneTransaction(requestsArr);
+//
+// 	for (let request of requestsArr) {
+// 		if (request?.result) console.log(request.result);
+// 	}
+//
+// 	pidb.add(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
+// 		objStoreName: 'testObjStore',
+// 		object: {id: 5, name: 'mr. Success', gender: 'any'},
+// 	}));
+//
+// 	pidb.add(new UnifiedPIDBRequestObject({
+// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
+// 		objStoreName: 'testObjStore',
+// 		object: {id: 6, name: 'Happy Hippo', gender: 'any'},
+// 	}));
+//
+// })();

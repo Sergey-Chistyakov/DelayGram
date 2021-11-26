@@ -19,3 +19,4 @@ for (let imageUrl of results) {
 
 galleriesCollection.lastAccessed.addURL(results);
 showGallery(galleriesCollection.lastAccessed);
+
