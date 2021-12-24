@@ -46,14 +46,15 @@ for (let jsFile of jsArr) {
 		script.onload = resolve();
 		script.onerror = reject();
 		script.src = jsFile.name;
-		scriptArr.push(script);
+		setTimeout(()=>{document.head.appendChild(script);},0);
+		// scriptArr.push(script);
 	};
 }
 
-let appendChildrenObj = {};
-appendChildrenObj.exeFunc = ()=>{document.head.append(...scriptArr);};
-appendChildrenObj.order = 66;
-appendChildrenObj.name = 'Appending Scripts object';
-jsArr.push(appendChildrenObj);
+// let appendChildrenObj = {};
+// appendChildrenObj.exeFunc = ()=>{document.head.append(...scriptArr);};
+// appendChildrenObj.order = 66;
+// appendChildrenObj.name = 'Appending Scripts object';
+// jsArr.push(appendChildrenObj);
 
 syncronizedPromises(jsArr);
