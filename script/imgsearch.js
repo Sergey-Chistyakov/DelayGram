@@ -19,14 +19,13 @@ class ModalImagePreviewElement {
     get #lockedByCurrentGallery() {
         if (!this.#imageElement) return false;
         let result = false;
-        galleriesCollection.lastAccessed.forEach((currentValue) => {
-            if (currentValue.imageUrl == this.#imageElement.src) {
+        galleriesCollection.lastAccessed.imageElementsCollection.forEach((currentValue) => {
+            if (currentValue.src == this.#imageElement.src) {
                 result = true;
             }
         });
         return result;
     }
-
 
     #eventListenerRefreshLockedStatus = this.#setSelected.bind(this);
 
@@ -41,7 +40,7 @@ class ModalImagePreviewElement {
 
     set #selected(value) {
         if (this.#imageElement == null) return;
-        if (galleriesCollection.lastAccessed.has(this.#imageElement.src)) {
+        if (galleriesCollection.lastAccessed.imageElementsCollection?.includes(this.#imageElement.src)) {
             this.divSelectIcon.setPropertiesValues(this._options.divSelectIcon.locked);
 
             return;
@@ -290,6 +289,7 @@ class WebQueryProvider {
             if (navigate == "next" && page > 1) page--;
             if (navigate == "previous") page++;
             alert(err);
+            throw err;  //todo delete this?
         } finally {
             this.resultObj.page = page;
             this.resultObj.query = this.#options.q;

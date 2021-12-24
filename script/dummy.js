@@ -1,5 +1,5 @@
 
-let results = [
+let dummyResults = [
     'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Supermoon_Nov-14-2016-minneapolis.jpg/1200px-Supermoon_Nov-14-2016-minneapolis.jpg',
     'https://phantom-marca.unidadeditorial.es/d3c076d28d2768328f83c297d722ddcb/crop/268x219/1257x776/f/jpg/assets/multimedia/imagenes/2021/07/23/16270444581760.jpg',
     'https://www.refinery29.com/images/10279335.jpg',
@@ -11,12 +11,12 @@ let results = [
     'https://www.boltonvalley.com/wp-content/uploads/2021/06/buck-moon.jpg',
 ];
 
-for (let imageUrl of results) {
+for (let imageUrl of dummyResults) {
     let div = new ModalImagePreviewElement();
     mainDOMElements.modal.imgGridContainer.appendChild(div.div);
     div.div.appendChild((new ImageExtended()).setSRC(imageUrl));
 }
 
-galleriesCollection.lastAccessed.addURL(results);
+galleriesCollection.lastAccessed.addURL(dummyResults);
 showGallery(galleriesCollection.lastAccessed);
 

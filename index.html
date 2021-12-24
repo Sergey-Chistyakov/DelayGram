@@ -19,12 +19,7 @@
     <!--CSS End-->
 
     <!--JS Begin-->
-    <script type="text/javascript" src="script/promisedindexdb.js"></script>
-    <script type="text/javascript" src="script/common.js"></script>
-    <script type="text/javascript" src="script/imggalleries.js"></script>
-    <script type="text/javascript" defer src="script/pageinit.js"></script>
-    <script type="text/javascript" defer src="script/imgsearch.js"></script>
-<!--    <script type="text/javascript" defer src="script/dummy.js"></script>-->
+    <script type="text/javascript" defer src="script/load.js"></script>
     <!--JS End-->
 </head>
 <body>
@@ -132,6 +127,7 @@
             <div class="logo-name">Delaygramm</div>
             <div class="logo-slogan">"We take care of you to wait more"</div>
         </div>
+        <!--Commands-->
         <ul>
             <li data-action="addImages">
             <span>
@@ -163,12 +159,15 @@
                 </span>
                 Image View: Small
             </li>
+            <li data-action="newGallery">
+            <span>
+                create_new_folder
+            </span>
+                Create new gallery
+            </li>
         </ul>
-        <ul>
-            <li>Gallery 1</li>
-            <li>Gallery 2</li>
-            <li>Gallery 3</li>
-            <li>Gallery 4</li>
+        <!--Galleries list-->
+        <ul id="galleries-list">
         </ul>
     </div>
     <!-- Main -->

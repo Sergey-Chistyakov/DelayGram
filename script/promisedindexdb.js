@@ -56,8 +56,8 @@ class PromisedIndexDB {
 		}
 	}
 
-	//todo handle non-abort query errors
 	#generalErrorHandler = function (event) {
+		//todo handle non-abort query errors
 		console.log(`Error in ${event.target}: ${event.target.error}`);
 		throw new Error(`Error in ${event.target}: ${event.target.error}`);
 	}
@@ -115,17 +115,6 @@ class PromisedIndexDB {
 		return Promise.resolve(transaction);
 	}
 
-	async #getObjectStore(objStoreName, writeable = false, transaction) {
-		if (!(await this.getDBObjectStores()).includes(objStoreName))
-			throw new Error(`ObjectSore |${objStoreName}|  not found in DB |${this.#dbName}|`);
-
-		return (transaction) ? (await transaction).objectStore(objStoreName)
-			: (await this.#getTransaction({
-				storeNamesArr: [objStoreName],
-				writeable: writeable,
-			})).objectStore(objStoreName);
-	}
-
 	#arrayfication(objectForArrayfiaction) {
 		if ((!objectForArrayfiaction)
 			|| (!['object', 'string'].includes(typeof objectForArrayfiaction) && !Array.isArray(objectForArrayfiaction))
@@ -162,10 +151,17 @@ class PromisedIndexDB {
 	}
 
 	async removeItem({objStoreName, id, object, transaction} = {}) {
-		if (!objStoreName || (!id || !object))
+		if (!objStoreName || (!id && !object))
 			throw new Error(`Invalid arguments |${arguments}|`);
 
-		let objStore = await this.#getObjectStore(objStoreName, true);
+		if (!transaction) {
+			if (!this.#currentDB) await this.#getDB();
+			transaction = await this.#getTransaction({
+				storeNamesArr: this.#arrayfication(objStoreName),
+				writeable: true,
+			});
+		}
+		let objStore = transaction.objectStore(objStoreName);
 		let request = objStore.delete(id ?? object[objStore.keyPath]);
 		request.onsuccess = (resolve, reject) => {
 			if (!transaction) request.transaction.commit();
@@ -177,7 +173,8 @@ class PromisedIndexDB {
 		};
 	}
 
-	// Allow using callback functions
+	// todo allow using callback functions on uobjArr
+	// todo allow half-way functions call between transaction elements
 	async allInOneTransaction(uObjArr) {
 		if (!uObjArr || !Array.isArray(uObjArr) || uObjArr.length < 1)
 			throw new Error(`Invalid arguments |${uObjArr}|`);
@@ -240,16 +237,29 @@ class PromisedIndexDB {
 		);
 	}
 
-	async getDBObjectStores() {
-		return Promise.resolve(Array.from(((this.#currentDB) ?? (await this.#getDB())).objectStoreNames));
+	async countAll({objStoreName, transaction} = {}) {
+		let objStore = (transaction ?? await this.#getTransaction({
+			storeNamesArr: this.#arrayfication(objStoreName),
+			writeable: false
+		})).objectStore(objStoreName);
+		let request = objStore.count();
+		return new Promise(((resolve, reject) => {
+
+			request.onerror = () => {
+				request.transaction.abort();
+				reject();
+			}
+
+			request.onsuccess = () => {
+				if (!transaction) request.transaction.commit();
+				resolve(isNaN(request.result) ? 0 : request.result);
+			}
+
+		}));
 	}
 
-//todo return promise
-//todo get transaction as an argument
-	async clearObjStore(objStoreName) {
-		let request = (await this.#getObjectStore(objStoreName, true)).clear();
-		request.onsuccess = () => request.transaction.commit();
-		request.onerror = () => request.transaction.abort();
+	async getDBObjectStores() {
+		return Promise.resolve(Array.from(((this.#currentDB) ?? (await this.#getDB())).objectStoreNames));
 	}
 
 	deleteDB() {
@@ -258,7 +268,24 @@ class PromisedIndexDB {
 	}
 }
 
-// Executable function-------------------------------------------------------------------------------------------------
+// Global variable -------------------------------------------------------------------------------------------------
+let pidb = new PromisedIndexDB({
+	dbName: 'dbGalleries',
+	version: 1,
+	upgradeNeededCallback: function (event) {
+		let db = event.target.result;
+		switch (db.version) {
+			case 1:
+				db.createObjectStore('images', {keyPath: 'url'});
+				db.createObjectStore('galleries', {keyPath: 'name'});
+		}
+	}
+}); // IDB manager class instance
+
+
+// Executable function -------------------------------------------------------------------------------------------------
+
+// Dummy for tests -------------------------------------------------------------------------------------------------
 // let pidb = new PromisedIndexDB({version: 2});
 // (async () => {
 // 	pidb.deleteDB();
@@ -327,3 +354,25 @@ class PromisedIndexDB {
 // 	}));
 //
 // })();
+
+
+// let pidb = new PromisedIndexDB({
+// 	dbName: 'dbGalleries',
+// 	version: 1,
+// 	upgradeNeededCallback: function (event) {
+// 		let db = event.target.result;
+// 		switch (db.version) {
+// 			case 1:
+// 				db.createObjectStore('images', {autoIncrement: true});
+// 				db.createObjectStore('galleries', {keyPath: 'name'});
+// 		}
+// 	}
+// });
+// pidb.deleteDB();
+// pidb.add({objStoreName: 'images', object: {n: 1}});
+// pidb.add({objStoreName: 'images', object: {n: 2}});
+// pidb.add({objStoreName: 'images', object: {n: 3}});
+//
+// pidb.removeItem({objStoreName: 'images', id: 2});
+// pidb.add({objStoreName: 'images', object: {n: 4}});
+// pidb.add({objStoreName: 'images', object: {n: 5}});

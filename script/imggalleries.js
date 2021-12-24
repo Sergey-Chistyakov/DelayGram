@@ -1,144 +1,249 @@
 "use strict"
+/*
+all interactions with DB in classes only
+todo check how committing selected images done, rewrite using galleriesManger
+*/
 
-let pidb = new PromisedIndexDB({
-	dbName: 'dbGalleries',
-	version: 1,
-	upgradeNeededCallback: function (event) {
-		let db = event.target.result;
-		switch (db.version) {
-			case 1:
-				db.createObjectStore("images", {keyPath: 'id'})
-					.createIndex("parentGallery", "parentGallery", {unique: false});
-				db.createObjectStore('galleries', {keyPath: 'name'});
+//God object ------------------------------------------------------------------------------------------
+let galleriesManager = {
+
+	async initiate() {
+		await this.getGalleriesFromIDB();
+		await this.getImagesFromIDB();
+		this.refreshGalleriesDomList();
+		galleriesCollection.setAndGet(galleriesCollection.lastChanged.name);
+		if (galleriesCollection.lastAccessed)
+			this.showGallery(galleriesCollection.lastAccessed);
+	},
+
+	async getGalleriesFromIDB() {
+		if ((await pidb.countAll({objStoreName: 'galleries'})) < 1)
+			galleriesCollection.setAndGet("default", GalleryHandleObject, {
+				name: "new gallery",
+				icon: "collections",
+				description: "Rename and fill",
+				imageURLarr: [],
+				createOrReplaceDBItem: true,
+				changed: new Date(),
+				created: new Date(),
+			});
+
+		let results = await pidb.getAllItems({objStoreName: 'galleries'});
+		for (let gallery of results) {
+			gallery.createOrReplaceDBItem = false;
+			galleriesCollection.setAndGet(gallery.name, GalleryHandleObject, gallery);
 		}
-	}
-});
 
-//------------------------------------------------------------------------------------------
+	},
+
+	async getImagesFromIDB() {
+		if ((await pidb.countAll({objStoreName: 'images'})) < 1) {
+			console.log('EMPTY IDB IMAGES');
+			return;
+		}
+
+		let results = await pidb.getAllItems({objStoreName: 'images'});
+		for (let image of results) {
+			image.createOrReplaceDBItem = false;
+			imagesCollection.set(image.url, new ImageHandleObject(image));
+		}
+
+	},
+
+	/**
+	 * Adds images into specified gallery collection
+	 * @param gallery String gallery name OR GalleryHandleObject
+	 * @param imgElementsSet Set of Image DOM Elements
+	 */
+	addSelectedImgElements(gallery, imgElementsSet) {
+		if (!gallery || !imgElementsSet || !(imgElementsSet instanceof Set)
+			|| (typeof gallery !== 'string' && !(gallery instanceof GalleryHandleObject))
+			|| !galleriesCollection.has(gallery?.name ?? gallery)) return;
+
+		galleriesCollection.setAndGet(gallery?.name ?? gallery);
+		for (let imageElement of imgElementsSet.values()) {
+			galleriesCollection.lastAccessed.imageURLarr.push(imageElement.src);
+			if (!imagesCollection.has(imageElement.src))
+				imagesCollection.set(imageElement.src, new ImageHandleObject({
+					url: imageElement.src,
+					imageElement: imageElement,
+				}));
+		}
+		galleriesCollection.lastAccessed.rewriteIDBItem();
+	},
+
+	/**
+	 * Fills main screen with gallery images
+	 * @param gallery GalleryHandleObject
+	 */
+	showGallery(gallery) {
+		if (!gallery?.name) return;
+		let imageElementsCollection = galleriesCollection.setAndGet(gallery.name).imageElementsCollection;
+		mainDOMElements.main.picContainer.innerHTML = "";
+		if (!imageElementsCollection || imageElementsCollection.length < 1) return;
+		for (let imageElement of imageElementsCollection) {
+			mainDOMElements.main.picContainer.appendChild(imageElement);
+		}
+	},
+
+	/**
+	 *
+	 * @param name {string} Name for new gallery
+	 * @param icon {string} Google font icons name
+	 * @param description {string} Some description
+	 * @returns {boolean} "false" if gallery with such name exists, "true" if OK
+	 */
+	addNewGallery({name, icon, description} = {}) {
+		if (!name) return false;
+		if (galleriesCollection.has(name)) return false; // gallery with such name exists
+
+		let newGallery = galleriesCollection.setAndGet(name, GalleryHandleObject, arguments[0]);
+		this.refreshGalleriesDomList();
+		this.showGallery(newGallery);
+		return true;
+	},
+
+	refreshGalleriesDomList() {
+		mainDOMElements.main.galleriesList.innerHTML = '';
+		for (let [galleryName, galleryHandle] of galleriesCollection) {
+			let li = document.createElement('li');
+			li.addEventListener('click', () => {
+				this.showGallery.call(this, galleryHandle)
+			});
+			let span = document.createElement('span');
+			span.innerHTML = galleryHandle.icon;
+			li.appendChild(span);
+			li.appendChild(document.createTextNode(galleryName));
+			mainDOMElements.main.galleriesList.appendChild(li);
+		}
+	},
+}
+
+//Collections classes------------------------------------------------------------------------------------------
 class GalleriesMap extends MapExtended {
 	constructor() {
 		super();
-		pidb.getAllItems({objStoreName: 'galleries'})
-			.then((galleriesArr) => {
-				for (let gallery of galleriesArr) {
-					galleriesCollection.setAndGet(gallery.name, GalleryImagesSet, gallery);
-				}
-			}).then(() => {
-			pidb.getAllItems({objStoreName: 'images'}).then((imagesArr) => {
-					//todo check image belongs to what gallery
-					for (let image of imagesArr) {
-						galleriesCollection.lastAccessed.add(new ImageHandleObject({
-							url: image.imageUrl,
-							parentGallery: galleriesCollection.lastAccessed,
-						}));
-					}
-				}
-			).then(() => {
-				showGallery(galleriesCollection.lastAccessed);
+		// todo check if galleries table empty
+	}
+
+	// todo get keys collection form idb and set last existing as lastAccessed
+	// todo check how lastAccessed is done
+	get lastAccessed() {
+		if (!super.lastAccessed) {
+			this.setAndGet("default", GalleryHandleObject, {
+				name: "new gallery",
+				icon: "collections",
+				description: "Rename and fill",
 			});
+		}
+
+		return super.lastAccessed;
+	}
+
+	get lastChanged() {
+
+		let lastChange = new Date(0);
+		let newestGallery = null;
+		this.forEach((value, key) => {
+			if (value.changed > lastChange) {
+				lastChange = value.changed;
+				newestGallery = this.get(key);
+			}
 		});
+		return newestGallery;
 	}
 }
 
-//------------------------------------------------------------------------------------------
-class GalleryImagesSet extends Set {
+class ImagesMap extends Map {
+	constructor() {
+		super();
+	}
+}
+
+// DONE Elements classes ---------------------------------------------------------------------------------------
+class GalleryHandleObject {
 	constructor({
-					name = null,
+					name,
 					icon = "help_center",
 					description = "",
+					imageURLarr = [],
 				} = {}) {
 		if (!name) throw new Error("Name is undefined or null");
 		if (galleriesCollection.has(name))
 			throw new Error("Gallery already exists");
-		super();
 		this.icon = icon;
 		this.description = description;
 		this.created = new Date();
 		this.changed = new Date();
 		this.name = name;
+		this.imageURLarr = (Array.isArray(imageURLarr) && imageURLarr.length > 0) ? imageURLarr : [];
 
+		this.rewriteIDBItem();
+	}
+
+
+	/**
+	 * get collection of images from bounded imageHandlers
+	 * returns array of image DOM elements or null if empty
+	 * @returns {null|*[]}
+	 */
+	get imageElementsCollection() {
+		if (this.imageURLarr.length < 1) return [];
+		let result = [];
+		this.imageURLarr.slice().reverse().forEach((url) => {
+			if (imagesCollection.get(url)?.imageElement)
+				result.push(imagesCollection.get(url).imageElement);
+		});
+		return result;
+	}
+
+	// rewrite this gallery in idb
+	rewriteIDBItem() {
+		this.changed = new Date();
 		pidb.add({
+			id: this.name,
 			objStoreName: 'galleries',
 			replaceExisting: true,
-			object: Object.assign(new Object(), this),
-		});
-
-		objectMixIn(this);
-	}
-
-	addImages(imageCollection) {
-		if (!imageCollection) return;
-		imageCollection.forEach((img) => {
-			try {
-				this.add(
-					new ImageHandleObject({imageElement: img, parentGallery: this})
-				);
-			} catch (e) {
-				console.log(`${e}\n${img.src}`);
-			}
+			object: Object.assign(new Object(), this)
 		});
 	}
 
-	addURL(urlCollection) {
-		if (!urlCollection) return;
-		urlCollection.forEach((imageURL) => {
-			try {
-				this.add(new ImageHandleObject({url: imageURL, parentGallery: this}));
-			} catch (e) {
-				console.log(`${e}\n${img.src}`);
-			}
-		});
+	show() {
+		galleriesManager.showGallery(this);
 	}
 
-	getNextPosition() {
-		let positionArray = Array.from(this).map((value) => value.position);
-		positionArray.push(0);
-		return Math.max(...positionArray) + 1;
-	}
 }
 
-//--Main Map with galleries-----------------------------------------------------------------
-let galleriesCollection = new GalleriesMap();
-// galleriesCollection.setAndGet("default", GalleryImagesSet, {
-// 	name: "default",
-// 	icon: "bug_report",
-// 	description: "Dummy gallery for tests",
-// });
-
-//------------------------------------------------------------------------------------------
+//todo rewrite constructor must work with image object from idb
 class ImageHandleObject {
-	#image = null; // It's possible that "#" will be able to passe into idb, one terrible day of my life
-	imageUrl = null;
+	#image = null;
+	url = null;
 
 	constructor({
 					url = null,
 					imageElement = null,
-					created = null,
-					position = null,
-					parentGallery = null,
+					createOrReplaceDBItem = true,
 				} = {}) {
 		if (!url && !imageElement)
 			throw new Error("Empty url and Image DOM element");
-		if (!parentGallery)
-			throw new Error('Argument |parentGallery| null or undefined');
 
-		if (imageElement) {
-			this.imageUrl = imageElement.src;
-		} else this.imageUrl = url;
-		this.created = created ?? new Date();
-		this.position = position ?? parentGallery.getNextPosition();
-		this.id = parentGallery.name + '@' + this.imageUrl;
-		console.log(this);
-		pidb.add({
-			objStoreName: 'images',
-			object: Object.assign(new Object(), this),
-			replaceExisting: true,
-		});
+		this.url = imageElement?.src ?? url;
+		if (!createOrReplaceDBItem) return;
+		try {
+			pidb.add({
+				objStoreName: 'images',
+				object: Object.assign(new Object(), this),
+				replaceExisting: false,
+			});
+		} catch (err) {
+			// todo ignore errors of existence of such item
+			throw err;
+		}
 	}
 
 	get imageElement() {
 		if (!this.#image?.complete) {
-			this.#image = new ImageExtended().setSRC(this.imageUrl);
+			this.#image = new ImageExtended().setSRC(this.url);
 			this.#image.setAttribute("loading", "lazy");
 			this.#image.alt = "..pic/brokenimage.png";
 		}
@@ -146,15 +251,15 @@ class ImageHandleObject {
 	}
 }
 
-//------------------------------------------------------------------------------------------
-// todo not perfect, rewrite
-function showGallery(gallery) {
-	if (!gallery) return;
-	mainDOMElements.main.picContainer.innerHTML = "";
-	gallery.forEach((imgHandle) => {
-		// let div = document.createElement('div');
-		// div.appendChild(imgHandle.imageElement);
-		// mainDOMElements.main.picContainer.appendChild(div);
-		mainDOMElements.main.picContainer.appendChild(imgHandle.imageElement);
-	});
-}
+// Global variables --------------------------------------------------------------------------------------------
+let galleriesCollection = new GalleriesMap();
+let imagesCollection = new ImagesMap();
+
+
+// Executive part -----------------------------------------------------------------------------------------------
+(async () => {
+	await galleriesManager.initiate();
+})();
+
+
+

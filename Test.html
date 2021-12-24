@@ -5,9 +5,29 @@
     <title>Test</title>
 
     <script type="text/javascript" src="script/common.js"></script>
-    <script type="text/javascript" src="script/promisedindexdb.js"></script>
+    <script type="text/javascript" src="script/i.js"></script>
 
     <script>
+		let obj1 = {name: 'John', index: 0, something: {favoriteNum: 'one'}};
+		let obj2 = {name: 'Helen', index: 1, something: {favoriteNum: 'alpha'}};
+		let obj3 = {name: 'Brandon', index: 2, something: {favoriteNum: 'e3'}};
+		let obj4 = {name: 'Liz', index: 3, something: {favoriteNum: 'x-ray'}};
+
+		let iterableCollection = new Map([[1, obj1], [2, obj2], [3, obj3], [4, obj4]]);
+		console.log(getPropValueArrFromEnum(iterableCollection.values(), 'name'));
+		console.log(getPropValueArrFromEnum(iterableCollection.values(), 'index'));
+		console.log(getPropValueArrFromEnum(iterableCollection.values(), 'something.favoriteNum'));
+
+		// function recursivePropGetter(pathArr, object, step = 0) {
+		// 	if (pathArr.length > step + 1) {
+		// 		return recursivePropGetter(pathArr, object[pathArr[step]], step + 1);
+		// 	}
+		// 	return object[pathArr[step]];
+		// }
+		//
+		// let path = '1.2.8'
+		// console.log(recursivePropGetter(path.split('.'), {1: {2: {3: {4: 'yes!'}, 8: 'victory'}}}, 0));
+
 
     </script>
 
