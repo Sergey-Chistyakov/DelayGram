@@ -13,14 +13,30 @@
     <link type="text/css" rel="stylesheet" href="css/modal.css"/>
     <link type="text/css" rel="stylesheet" href="css/flex.css"/>
     <link type="text/css" rel="stylesheet" href="css/input.css"/>
-    <link type="text/css" rel="stylesheet" href="css/lightbox.css"/>
     <link type="text/css" rel="stylesheet" href="css/loading.css"/>
+    <link type="text/css" rel="stylesheet" href="css/newgallery.css"/>
     <link type="text/css" rel="stylesheet" href="css/mainmenue.css"/>
+    <link type="text/css" rel="stylesheet" href="css/logo.css"/>
     <!--CSS End-->
 
     <!--JS Begin-->
     <script type="text/javascript" defer src="script/load.js"></script>
     <!--JS End-->
+
+    <!--Templates Begin-->
+    <template id="selectable-icon">
+        <span id="icon" data-state=""></span>
+        <link type="text/css" rel="stylesheet" href="css/customelements/selectableicons.css"/>
+    </template>
+
+    <template id="menu-element">
+        <li>
+            <span id="icon"></span>
+            <span id="desc"></span>
+        </li>
+        <!--        <link type="text/css" rel="stylesheet" href="css/customelements/selectableicons.css"/>-->
+    </template>
+    <!--Templates End-->
 </head>
 <body>
 <!-- loading screen Begin -->
@@ -111,12 +127,35 @@
     </div>
 </div>
 <!-- modal-container End -->
+<!-- modal-new-gallery-screen Begin-->
+<div id="create-new-gall-container" class="new-gallery-container">
+    <div class="new-gall-content">
+        <div class="item-new-gall-name">
+            <input type="text" id="gallery-name-input" placeholder="Gallery name">
+        </div>
+        <div class="item-new-gall-desc">
+            <textarea id="gallery-desc-input" class="scrollbar" rows="5" placeholder="Gallery description"></textarea>
+        </div>
+        <div id="icons-container" class="item-new-gall-icon scrollbar">
+        </div>
+        <div class="item-new-gall-controls">
+            <input type="button" data-action="confirm" value="Confirm" style="margin-bottom: 3px;">
+            <input type="button" data-action="decline" value="Decline">
+        </div>
+    </div>
+</div>
+<!-- modal-new-gallery-screen End-->
 <!-- main-container Begin -->
 <div class="grid-container">
     <!-- header -->
-    <div class="item-header" id="header"></div>
-    <!-- Menu -->
-    <div class="item-menu" id="menu">
+    <div class="item-header" id="header">
+        <div>
+            <span style="text-align: center; font-size: 20px;">Gallery name</span>
+            <span style="text-align: center;">Gallery description</span>
+        </div>
+    </div>
+    <!--Logo-->
+    <div class="item-logo">
         <div class="logo-menu">
             <div class="logo-pic">
                 <div class="logo-pic-border">
@@ -127,53 +166,60 @@
             <div class="logo-name">Delaygramm</div>
             <div class="logo-slogan">"We take care of you to wait more"</div>
         </div>
+    </div>
+    <!-- Menu -->
+    <div class="item-menu" id="menu">
         <!--Commands-->
-        <ul>
-            <li data-action="addImages">
+        <div class="scrollbar">
+            <ul>
+                <li data-action="addImages">
             <span>
                 note_add
             </span>
-                Find and add images to gallery
-            </li>
-            <li data-action="imageViewFull">
+                    Find and add images to gallery
+                </li>
+                <li data-action="imageViewFull">
                 <span>
                     fit_screen
                 </span>
-                Image View: Fit
-            </li>
-            <li data-action="imageViewLarge">
+                    Image View: Fit
+                </li>
+                <li data-action="imageViewLarge">
                 <span>
                     photo_size_select_actual
                 </span>
-                Image View: Large
-            </li>
-            <li data-action="imageViewMedium">
+                    Image View: Large
+                </li>
+                <li data-action="imageViewMedium">
                 <span>
                     photo_size_select_large
                 </span>
-                Image View: Medium
-            </li>
-            <li data-action="imageViewSmall">
+                    Image View: Medium
+                </li>
+                <li data-action="imageViewSmall">
                 <span>
                     photo_size_select_small
                 </span>
-                Image View: Small
-            </li>
-            <li data-action="newGallery">
+                    Image View: Small
+                </li>
+                <li data-action="newGallery">
             <span>
                 create_new_folder
             </span>
-                Create new gallery
-            </li>
-        </ul>
-        <!--Galleries list-->
-        <ul id="galleries-list">
-        </ul>
+                    Create new gallery
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!--Galleries list-->
+    <div class="item-galleries item-menu">
+        <div class="scrollbar">
+            <ul id="galleries-list">
+            </ul>
+        </div>
     </div>
     <!-- Main -->
-    <div class="item-main" id="main">
-        <div id="pic-container-main" class="flex-container" data-image-size="full">
-        </div>
+    <div id="pic-container-main" class="item-main flex-container" data-image-size="row-large">
     </div>
     <!-- Footer -->
     <div class="item-footer" id="footer" style="color: black">

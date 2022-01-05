@@ -1,43 +1,69 @@
 .grid-container {
     display: grid;
-    grid-template-areas: "header header header" "_menu main spacer" "footer footer footer";
+    grid-template-areas:
+            "_logo header"
+            "_menu main"
+            "_galeries main"
+            "footer main";
     grid-gap: 5px;
-    /*background-color: transparent;*/
-    /* padding: 3px; */
-    grid-template-columns: 250px auto 10px;
-    grid-template-rows: min-content auto min-content;
-    min-height: 97vh;
-    width: 100%;
+    margin-right: 20px;
+    grid-template-columns: 250px calc(100vw - 295px);
+    grid-template-rows: 95px 235px calc(100vh - 40px - 15px - 95px - 235px - 32px) 32px;
+    min-height: calc(100vh - 40px);
+    max-height: calc(100vh - 40px);
+    position: fixed;
 }
 
 .grid-container > div {
-    /*background-color: inherit;*/
     text-align: left;
-    /* padding: 5px 5px; */
+}
+
+.item-logo {
+    grid-area: _logo;
+    background-color: var(--color-elements-1);
 }
 
 .item-header {
     grid-area: header;
+    background-color: var(--color-elements-1);
+    padding: 5px;
+    display: flex;
+}
+
+.item-header > div {
+    display: flex;
+    flex-direction: column;
+    border: var(--main-text-color-light) solid var(--border-size);
+    border-radius: var(--border-radius);
+    flex: 1;
+}
+
+.item-header > div> :first-child{
+    font-family: 'Satisfy';
 }
 
 .item-menu {
     grid-area: _menu;
-    position: sticky;
-    /* top: 0px; */
-    height: 100%;
+}
+
+.item-galleries {
+    grid-area: _galeries;
+}
+
+.item-galleries::-webkit-scrollbar {
+    display: none;
 }
 
 .item-main {
     grid-area: main;
-    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.item-main::-webkit-scrollbar {
+    display: none;
 }
 
 .item-footer {
     grid-area: footer;
     font-size: 10pt;
 }
-
-/*.item-main > div > div {*/
-/*    background-color: var(--color-elements-1);*/
-/*    border: 2px solid var(--main-text-color-light);*/
-/*}*/

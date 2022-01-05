@@ -1,0 +1,24 @@
+span {
+    font-family: "Material Icons";
+    color: var(--main-text-color-dark);
+    font-size: 20px;
+    border: var(--main-text-color-dark) solid 3px;
+    border-radius: 3px;
+    user-select: none;
+    cursor: pointer;
+}
+
+span:hover,
+span:focus {
+    color: var(--color-elements-1);
+    border: var(--color-elements-1) solid 3px;
+}
+
+span[data-state='selected'] {
+    color: var(--color-elements-2);
+    border: var(--color-elements-2) solid 3px;
+}
+
+span[data-state='hidden'] {
+    display: none;
+}

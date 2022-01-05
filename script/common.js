@@ -101,7 +101,7 @@ function getPropValueArrFromEnum(iterableCollection, propertyPath) {
 	let propValues = [];
 	for (let obj of iterableCollection) {
 		if (obj)
-			propValues.push(recursivePropGetter(propertyPath.split('.'),obj));
+			propValues.push(recursivePropGetter(propertyPath.split('.'), obj));
 	}
 	return propValues;
 }
@@ -232,6 +232,32 @@ function objectMixIn(objForMixIn) {
 
 function getCallerFunctionName() {
 	return new Error('dummy').stack.match(/at (\S+)/g)[1].slice(3);
+}
+
+/**
+ * no falsy check! (null = undefined = 0 = false)!
+ * only own properties comparation for objects!
+ * RECURSION USED!
+ * @param a {object||Primitive||Array}
+ * @param b {object||Primitive||Array}
+ * @returns {boolean}
+ */
+function objectComparator(a, b) {
+	if (!a && !b && a === b) return true;
+	if (a === undefined || b === undefined) return false;
+	if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((value, index) => objectComparator(value, b[index]));
+	if (typeof a === typeof b) {
+		if (typeof a === 'object') {
+			if (Object.keys(a).length !== Object.keys(b).length) return false;
+			for (let key of Object.keys(a)) {
+				if (!(key in b)) return false;
+				if (!objectComparator(a[key], b[key])) return false;
+			}
+			return true;
+		}
+		return a === b;
+	}
+	return false;
 }
 
 

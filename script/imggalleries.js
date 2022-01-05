@@ -7,6 +7,8 @@ todo check how committing selected images done, rewrite using galleriesManger
 //God object ------------------------------------------------------------------------------------------
 let galleriesManager = {
 
+	galleryInChangeMode: null,
+
 	async initiate() {
 		await this.getGalleriesFromIDB();
 		await this.getImagesFromIDB();
@@ -69,7 +71,7 @@ let galleriesManager = {
 					imageElement: imageElement,
 				}));
 		}
-		galleriesCollection.lastAccessed.rewriteIDBItem();
+		galleriesCollection.lastAccessed.rewriteIDBItem();//todo move to constructor on image collection set
 	},
 
 	/**
@@ -105,7 +107,7 @@ let galleriesManager = {
 
 	refreshGalleriesDomList() {
 		mainDOMElements.main.galleriesList.innerHTML = '';
-		for (let [galleryName, galleryHandle] of galleriesCollection) {
+		for (let galleryHandle of galleriesCollection.orderedByCreationDate) {
 			let li = document.createElement('li');
 			li.addEventListener('click', () => {
 				this.showGallery.call(this, galleryHandle)
@@ -113,7 +115,7 @@ let galleriesManager = {
 			let span = document.createElement('span');
 			span.innerHTML = galleryHandle.icon;
 			li.appendChild(span);
-			li.appendChild(document.createTextNode(galleryName));
+			li.appendChild(document.createTextNode(galleryHandle.name));
 			mainDOMElements.main.galleriesList.appendChild(li);
 		}
 	},
@@ -152,6 +154,12 @@ class GalleriesMap extends MapExtended {
 		});
 		return newestGallery;
 	}
+
+	get orderedByCreationDate() {
+		return Array.from(this.values()).sort(function(a,b) {
+			return b.created - a.created;
+		});
+	}
 }
 
 class ImagesMap extends Map {
@@ -166,6 +174,7 @@ class GalleryHandleObject {
 					name,
 					icon = "help_center",
 					description = "",
+					created,
 					imageURLarr = [],
 				} = {}) {
 		if (!name) throw new Error("Name is undefined or null");
@@ -173,7 +182,7 @@ class GalleryHandleObject {
 			throw new Error("Gallery already exists");
 		this.icon = icon;
 		this.description = description;
-		this.created = new Date();
+		this.created = created ?? new Date();
 		this.changed = new Date();
 		this.name = name;
 		this.imageURLarr = (Array.isArray(imageURLarr) && imageURLarr.length > 0) ? imageURLarr : [];
@@ -181,11 +190,14 @@ class GalleryHandleObject {
 		this.rewriteIDBItem();
 	}
 
+	// todo save on image collection change
+	// set imageURLarr(value) {
+	//
+	// }
 
 	/**
 	 * get collection of images from bounded imageHandlers
-	 * returns array of image DOM elements or null if empty
-	 * @returns {null|*[]}
+	 * @returns {null|*[HTMLImageElement]} returns array of image DOM elements or null if empty
 	 */
 	get imageElementsCollection() {
 		if (this.imageURLarr.length < 1) return [];
@@ -200,7 +212,7 @@ class GalleryHandleObject {
 	// rewrite this gallery in idb
 	rewriteIDBItem() {
 		this.changed = new Date();
-		pidb.add({
+		pidb.addItem({
 			id: this.name,
 			objStoreName: 'galleries',
 			replaceExisting: true,
@@ -230,7 +242,7 @@ class ImageHandleObject {
 		this.url = imageElement?.src ?? url;
 		if (!createOrReplaceDBItem) return;
 		try {
-			pidb.add({
+			pidb.addItem({
 				objStoreName: 'images',
 				object: Object.assign(new Object(), this),
 				replaceExisting: false,

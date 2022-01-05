@@ -1,49 +1,50 @@
 .flex-container {
     display: flex;
-    background-color: transparent;
-    margin-right: 3px;
-    width: 100%;
+    padding: 5px;
 }
 
 .flex-container > img {
     margin-bottom: 10px;
     background-color: gray;
     border-radius: var(--border-radius);
-    border: 2px solid var(--main-text-color-light);
+    border: var(--border-size) solid var(--main-text-color-light);
 }
 
 /* Size of image style */
-.flex-container[data-image-size^="row"] {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
-}
-
 .flex-container[data-image-size="full"] {
     flex-direction: column;
     flex-wrap: unset;
+    justify-content: normal;
 }
 
 .flex-container[data-image-size="full"] > img {
-    padding: 20px;
-}
-
-.flex-container[data-image-size$="small"] > img {
-    height: 100px;
-    padding: 8px;
-}
-
-.flex-container[data-image-size$="medium"] > img {
-    height: 150px;
-    padding: 12px;
-}
-
-.flex-container[data-image-size$="large"] > img {
-    height: 250px;
-    padding: 15px;
+    padding: 5px;
+    flex: none;
 }
 
 .flex-container[data-image-size="full"] > img:last-child {
     margin-bottom: 0;
 }
+
+.flex-container[data-image-size^="row"] {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+.flex-container[data-image-size$="small"] > img {
+    height: calc(calc(100vh - 240px) / 4);
+    padding: 5px;
+}
+
+.flex-container[data-image-size$="medium"] > img {
+    height: calc(calc(100vh - 230px) / 3);
+    padding: 5px;
+}
+
+.flex-container[data-image-size$="large"] > img {
+    height: calc(calc(100vh - 220px) / 2);
+    padding: 5px;
+}
+
 

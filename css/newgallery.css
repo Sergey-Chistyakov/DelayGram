@@ -1,0 +1,79 @@
+.new-gallery-container {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: hidden; /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0); /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+.new-gall-content {
+    background-color: var(--main-bg-color-all);
+    margin: 2% auto; /* 5% from the top and centered */
+    padding: 20px;
+    border: none;
+    width: 350px;
+    height: 350px;
+    color: black;
+    opacity: 1.0;
+    text-align: center;
+    background-image: radial-gradient(circle, #f1f1f1, #e7e7e7, #dddddd, #d6d6d6, #cecece, #c7c7c7);
+
+    display: grid;
+    grid-template-areas:
+    "name"
+    "desc"
+    "icons"
+    "controls";
+    grid-gap: 5px;
+    grid-template-rows: min-content min-content auto min-content;
+}
+
+.item-new-gall-name {
+    grid-area: name;
+    display: flex;
+}
+
+.item-new-gall-name :first-child {
+    flex: 1;
+}
+
+.item-new-gall-desc {
+    grid-area: desc;
+    display: flex;
+}
+
+.item-new-gall-desc :first-child {
+    flex: 1;
+}
+
+.item-new-gall-icon {
+    grid-area: icons;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    overflow: scroll;
+    justify-content: space-around;
+    gap: 5px;
+    padding: 5px;
+    border: var(--color-elements-1) solid var(--border-size);
+    border-radius: var(--border-radius);
+    overflow-x: hidden;
+}
+
+.item-new-gall-controls {
+    grid-area: controls;
+}
+
+.new-gall-content span {
+    font-family: "Material Icons";
+    color: var(--main-text-color-dark);
+    font-size: 20px;
+    border: var(--main-text-color-dark) solid 3px;
+    border-radius: 3px;
+    margin: 1px;
+}

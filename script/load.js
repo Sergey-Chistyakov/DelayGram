@@ -28,11 +28,11 @@ async function syncronizedPromises(objArray) {
 }
 
 // loading js files via promises --------------------------------------------------------------------------------------
-// todo search for info how to check if DOM element ready
 let scriptArr = [];
 
 let jsArr = [
 	{name: 'script/common.js', order: 0, exeFunc: null},
+	{name: 'script/customelements/selectableicon.js', order: 0, exeFunc: null},
 	{name: 'script/promisedindexdb.js', order: 1, exeFunc: null},
 	{name: 'script/imgsearch.js', order: 1, exeFunc: null},
 	{name: 'script/globalvariables.js', order: 2, exeFunc: null},
@@ -46,15 +46,8 @@ for (let jsFile of jsArr) {
 		script.onload = resolve();
 		script.onerror = reject();
 		script.src = jsFile.name;
-		setTimeout(()=>{document.head.appendChild(script);},0);
-		// scriptArr.push(script);
+		setTimeout(()=>{document.head.appendChild(script);},1);
 	};
 }
-
-// let appendChildrenObj = {};
-// appendChildrenObj.exeFunc = ()=>{document.head.append(...scriptArr);};
-// appendChildrenObj.order = 66;
-// appendChildrenObj.name = 'Appending Scripts object';
-// jsArr.push(appendChildrenObj);
 
 syncronizedPromises(jsArr);

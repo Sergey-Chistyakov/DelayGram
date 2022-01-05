@@ -15,15 +15,10 @@ input[type=button]:focus {
     cursor: pointer;
 }
 
-input[type=button].large {
-    /*margin: 10px;*/
-    /*padding: 20px;*/
-}
-
 input[type=button].close {
     padding: 0;
     margin: 0;
-    border:none;
+    border: none;
     font-family: 'Material Icons';
     color: black;
     font-size: 32px;
@@ -47,4 +42,17 @@ input[type=text]:focus,
 input[type=text]:hover {
     outline: none;
     border-color: var(--color-elements-2);
+}
+
+textarea {
+    border: 2px solid var(--color-elements-1);
+    border-radius: var(--border-radius);
+    resize: none;
+    outline: none;
+}
+
+
+textarea:hover,
+textarea:focus {
+    border: 2px solid var(--color-elements-2);
 }

@@ -96,6 +96,16 @@ class PromisedIndexDB {
 		});
 	}
 
+	#arrayfication(objectForArrayfiaction) {
+		if ((!objectForArrayfiaction)
+			|| (!['object', 'string'].includes(typeof objectForArrayfiaction) && !Array.isArray(objectForArrayfiaction))
+			|| (Array.isArray(objectForArrayfiaction) && objectForArrayfiaction.length < 1)
+			|| (typeof objectForArrayfiaction === 'string' && objectForArrayfiaction.length < 1))
+			throw new Error(`Invalid arguments |${objectForArrayfiaction}|`);
+
+		return (Array.isArray(objectForArrayfiaction) ? objectForArrayfiaction : [objectForArrayfiaction]);
+	}
+
 	async #getTransaction({storeNamesArr = null, writeable = false} = {}) {
 		if (!Array.isArray(storeNamesArr) || storeNamesArr.length < 1 || typeof (writeable) !== 'boolean')
 			throw new Error(`Invalid arguments in |${getCallerFunctionName()}|`);
@@ -115,20 +125,10 @@ class PromisedIndexDB {
 		return Promise.resolve(transaction);
 	}
 
-	#arrayfication(objectForArrayfiaction) {
-		if ((!objectForArrayfiaction)
-			|| (!['object', 'string'].includes(typeof objectForArrayfiaction) && !Array.isArray(objectForArrayfiaction))
-			|| (Array.isArray(objectForArrayfiaction) && objectForArrayfiaction.length < 1)
-			|| (typeof objectForArrayfiaction === 'string' && objectForArrayfiaction.length < 1))
-			throw new Error(`Invalid arguments |${objectForArrayfiaction}|`);
-
-		return (Array.isArray(objectForArrayfiaction) ? objectForArrayfiaction : [objectForArrayfiaction]);
-	}
-
 	// Public Methods /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 	//todo all methods must return null or result
 
-	async add({objStoreName, object, replaceExisting = false, transaction} = {}) {
+	async addItem({objStoreName, object, replaceExisting = false, transaction} = {}) {
 		if (!transaction) {
 			if (!this.#currentDB) await this.#getDB();
 			transaction = await this.#getTransaction({
@@ -199,11 +199,11 @@ class PromisedIndexDB {
 			uniObj.transaction = trans;
 			switch (uniObj.requestType) {
 				case UnifiedPIDBRequestObject.REQUEST_TYPE.add:
-					uniObj.result = await this.add(uniObj);
+					uniObj.result = await this.addItem(uniObj);
 					break;
 				case UnifiedPIDBRequestObject.REQUEST_TYPE.replace:
 					uniObj.replaceExisting = true;
-					uniObj.result = await this.add(uniObj);
+					uniObj.result = await this.addItem(uniObj);
 					break;
 				case UnifiedPIDBRequestObject.REQUEST_TYPE.remove:
 					uniObj.result = await this.removeItem(uniObj);
@@ -258,6 +258,47 @@ class PromisedIndexDB {
 		}));
 	}
 
+	async hasItem({objStoreName, transaction, id, object, comparingPropPath} = {}) {
+		if (!objStoreName || (!id && !object))
+			throw new Error(`Invalid arguments |${arguments}|`);
+
+		let item = await this.getItem(arguments[0]);
+		if (!item) return Promise.resolve(false);
+
+		if (!comparingPropPath) return Promise.resolve(true);
+
+		let propToCompareArr = getPropValueArrFromEnum([item, object], comparingPropPath);
+		return Promise.resolve(propToCompareArr?.length === 2 && objectComparator(...propToCompareArr));
+	}
+
+	async getItem({objStoreName, id, object, transaction} = {}) {
+		if (!objStoreName || (!id && !object))
+			throw new Error(`Invalid arguments |${arguments}|`);
+
+		if (!transaction) {
+			if (!this.#currentDB) await this.#getDB();
+			transaction = await this.#getTransaction({
+				storeNamesArr: this.#arrayfication(objStoreName),
+				writeable: true,
+			});
+		}
+		let objStore = transaction.objectStore(objStoreName);
+		let request = objStore.get(id ?? object[objStore.keyPath]);
+		return new Promise(((resolve, reject) => {
+				request.onerror = () => {
+					request.transaction.abort();
+					reject();
+				}
+
+				request.onsuccess = () => {
+					if (!transaction) request.transaction.commit();
+					resolve(request.result);
+				}
+
+			})
+		);
+	}
+
 	async getDBObjectStores() {
 		return Promise.resolve(Array.from(((this.#currentDB) ?? (await this.#getDB())).objectStoreNames));
 	}
@@ -284,95 +325,3 @@ let pidb = new PromisedIndexDB({
 
 
 // Executable function -------------------------------------------------------------------------------------------------
-
-// Dummy for tests -------------------------------------------------------------------------------------------------
-// let pidb = new PromisedIndexDB({version: 2});
-// (async () => {
-// 	pidb.deleteDB();
-//
-// 	let requestsArr = [];
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
-// 		objStoreName: 'testObjStore',
-// 		transaction: null,
-// 		object: {id: 1, name: 'AlienSpecies', gender: 'undefined'},
-// 		id: null,
-// 	}));
-//
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
-// 		objStoreName: 'testObjStore',
-// 		transaction: null,
-// 		object: {id: 2, name: 'John', gender: 'male'},
-// 		id: null,
-// 	}));
-//
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
-// 		objStoreName: 'testObjStore',
-// 		object: {id: 3, name: 'Anna', gender: 'female'},
-// 	}));
-//
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
-// 		objStoreName: 'testObjStore',
-// 		object: {id: 4, name: 'Helen', gender: 'female'},
-// 	}));
-//
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.getAll,
-// 		objStoreName: 'testObjStore',
-// 	}));
-//
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.replace,
-// 		objStoreName: 'testObjStore',
-// 		object: {id: 1, name: 'German', gender: 'male'},
-// 	}));
-//
-// 	requestsArr.push(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.getAll,
-// 		objStoreName: 'testObjStore',
-// 	}));
-//
-// 	await pidb.allInOneTransaction(requestsArr);
-//
-// 	for (let request of requestsArr) {
-// 		if (request?.result) console.log(request.result);
-// 	}
-//
-// 	pidb.add(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
-// 		objStoreName: 'testObjStore',
-// 		object: {id: 5, name: 'mr. Success', gender: 'any'},
-// 	}));
-//
-// 	pidb.add(new UnifiedPIDBRequestObject({
-// 		requestType: UnifiedPIDBRequestObject.REQUEST_TYPE.add,
-// 		objStoreName: 'testObjStore',
-// 		object: {id: 6, name: 'Happy Hippo', gender: 'any'},
-// 	}));
-//
-// })();
-
-
-// let pidb = new PromisedIndexDB({
-// 	dbName: 'dbGalleries',
-// 	version: 1,
-// 	upgradeNeededCallback: function (event) {
-// 		let db = event.target.result;
-// 		switch (db.version) {
-// 			case 1:
-// 				db.createObjectStore('images', {autoIncrement: true});
-// 				db.createObjectStore('galleries', {keyPath: 'name'});
-// 		}
-// 	}
-// });
-// pidb.deleteDB();
-// pidb.add({objStoreName: 'images', object: {n: 1}});
-// pidb.add({objStoreName: 'images', object: {n: 2}});
-// pidb.add({objStoreName: 'images', object: {n: 3}});
-//
-// pidb.removeItem({objStoreName: 'images', id: 2});
-// pidb.add({objStoreName: 'images', object: {n: 4}});
-// pidb.add({objStoreName: 'images', object: {n: 5}});

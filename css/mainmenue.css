@@ -3,15 +3,22 @@ div.item-menu {
     border-radius: var(--border-radius);
 }
 
-div.item-menu > ul {
-    list-style: none;
+div.item-menu > div {
     border: var(--border-size) solid var(--main-text-color-light);
     border-radius: var(--border-radius);
     margin: 5px;
     padding: 5px;
+    height: calc(100% - 23px);
+    overflow-y: scroll;
 }
 
-div.item-menu > ul > li {
+div.item-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+div.item-menu ul > li {
     padding: 2px 2px 2px 5px;
     border-radius: var(--border-radius);
     display: flex;
@@ -21,78 +28,18 @@ div.item-menu > ul > li {
     cursor: pointer;
 }
 
-div.item-menu > ul > li:hover {
+div.item-menu ul > li:hover {
     background-color: var(--color-elements-2);
 }
 
-div.item-menu > ul > li:last-child {
+div.item-menu ul > li:last-child {
     margin-bottom: 0px;
 }
 
-div.item-menu > ul > li > span {
+div.item-menu ul > li > span {
     margin-right: 3px;
     font-size: 20pt;
     font-family: "Material Icons";
 }
 
-/*logo-------------------------------------------------------------*/
-div.logo-menu {
-    border: var(--border-size) solid var(--main-text-color-light);
-    display: grid;
-    grid-template-columns: 50px auto;
-    grid-template-rows: 50px auto;
-    grid-gap: 5px;
-    padding: 5px;
-    margin: 5px;
-}
-
-div.logo-pic {
-    grid-row: 1;
-    grid-column: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(45deg, var(--color-elements-2),
-    var(--color-elements-4),
-    var(--color-elements-3));
-    border-radius: 20%;
-}
-
-div.logo-pic-border {
-    display: grid;
-    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-gap: 2px;
-    border: 3px solid var(--main-text-color-light);
-    border-radius: 30%;
-    height: 70%;
-    width: 70%;
-}
-
-div.logo-pic-smile {
-    font-family: "Material Icons";
-    font-size: 24px;
-    grid-row: 3 / span 3;
-    grid-column: 2 / span 3;
-}
-
-div.logo-pic-circle {
-    font-family: "Material Icons";
-    grid-row: 1 / span 2;
-    grid-column: 5 / span 2;
-
-}
-
-div.logo-name {
-    grid-row: 1;
-    grid-column: 2;
-    font-size: 32px;
-    font-family: 'Satisfy';
-}
-
-div.logo-slogan {
-    grid-row: 2;
-    grid-column: 1 /span 2;
-    font-size: 14px;
-}
 
