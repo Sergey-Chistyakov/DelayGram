@@ -8,6 +8,7 @@
     background-color: gray;
     border-radius: var(--border-radius);
     border: var(--border-size) solid var(--main-text-color-light);
+    min-height: 100px;
 }
 
 /* Size of image style */
@@ -47,4 +48,10 @@
     padding: 5px;
 }
 
+.flex-container > img[data-dragdrop-droppable-style=true] {
+    background-color: var(--color-elements-4);
+}
 
+.flex-container > img[data-dragdrop-droppable-style=false] {
+    background-color: inherit;
+}

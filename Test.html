@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <title>Test</title>
 
-    <script>
+    <script type="text/javascript" src="script/customelements/popupelement.js"></script>
 
-
-
-    </script>
 
     <style>
+        @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
         body {
             background-color: gray;
         }
@@ -18,34 +17,47 @@
         * {
             color: white;
         }
+
+        :root{
+            --border-radius: 3px;
+            --border-size: 3px;
+            --color-elements-1: cyan;
+        }
+
+        pop-up{
+            border: 3px solid red;
+            background-color: white;
+            color: black;
+        }
     </style>
+
+    <template id="popup-element">
+        <div id="popup" class="popup-container">
+            <div id="popup-text" class="popup-text"></div>
+            <div id="arrow" class="popup-arrow"></div>
+        </div>
+        <link type="text/css" rel="stylesheet" href="css/customelements/popupelement.css"/>
+    </template>
+
 </head>
 <body>
-<div>
+<div style="position: absolute; border: 2px solid black; width:100px; height:100px; top:150px; left:150px">
     Check console!
-</div>
-<script>
-	customElements.define('user-card', class extends HTMLElement {
-		connectedCallback() {
-			this.attachShadow({mode: 'open'});
-			this.shadowRoot.innerHTML = `
-      <div>Имя:
-        <slot name="username"></slot>
-      </div>
-      <div>Дата рождения:
-        <slot name="birthday"></slot>
-        <slot name="universal"></slot>
-      </div>
-    `;
-		}
-	});
-</script>
+    <pop-up side="right" color="red" visible="true" >
+        right
+    </pop-up>
+    <pop-up side="top" color="red" visible="true">
+        Some text on top
+    </pop-up>
+    <pop-up side="bottom" color="red" visible="true" width="200">
+        I can do anything i want, and nobody will stop me!!
+        Awhahahahahha
+        yeee bitch
+    </pop-up>
+    <pop-up side="left" color="red" visible="true">
+        Shit, this thing, it is working!! Working!!! AAARRRRRRRR
+    </pop-up>
 
-<user-card>
-    <text slot="username">Nexta</text>
-    <text slot="birthday">winter time </text>
-    <text slot="birthday">kill the sun</text>
-</user-card>
 </body>
 </html>
 <script>

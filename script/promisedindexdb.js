@@ -138,16 +138,16 @@ class PromisedIndexDB {
 		}
 		let store = transaction.objectStore(objStoreName);
 		let request = (replaceExisting) ? store.put(object) : store.add(object);
-		return new Promise(((resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			request.onsuccess = () => {
 				if (!transaction) request.transaction.commit();
 				resolve(null);
-			}
+			};
 			request.onerror = () => {
 				request.transaction.abort();
 				reject();
 			}
-		}));
+		});
 	}
 
 	async removeItem({objStoreName, id, object, transaction} = {}) {
@@ -163,14 +163,16 @@ class PromisedIndexDB {
 		}
 		let objStore = transaction.objectStore(objStoreName);
 		let request = objStore.delete(id ?? object[objStore.keyPath]);
-		request.onsuccess = (resolve, reject) => {
-			if (!transaction) request.transaction.commit();
-			resolve(null);
-		};
-		request.onerror = (resolve, reject) => {
-			request.transaction.abort();
-			reject();
-		};
+		return new Promise((resolve, reject) => {
+			request.onsuccess = () => {
+				if (!transaction) request.transaction.commit();
+				resolve(null);
+			};
+			request.onerror = () => {
+				request.transaction.abort();
+				reject();
+			};
+		});
 	}
 
 	// todo allow using callback functions on uobjArr
@@ -312,16 +314,15 @@ class PromisedIndexDB {
 // Global variable -------------------------------------------------------------------------------------------------
 let pidb = new PromisedIndexDB({
 	dbName: 'dbGalleries',
-	version: 1,
+	version: 2,
 	upgradeNeededCallback: function (event) {
 		let db = event.target.result;
 		switch (db.version) {
 			case 1:
 				db.createObjectStore('images', {keyPath: 'url'});
 				db.createObjectStore('galleries', {keyPath: 'name'});
+			case 2:
+				db.deleteObjectStore('images');
 		}
 	}
 }); // IDB manager class instance
-
-
-// Executable function -------------------------------------------------------------------------------------------------

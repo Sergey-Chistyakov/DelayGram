@@ -60,8 +60,6 @@ class MapExtended extends Map {
 		return this.#lastAcc;
 	}
 
-	// todo some fills for standart methods using super.--- with lastAccessed set
-
 	setAndGet(key, TypeConstructor, argsForConstructor) {
 		if (!this.has(key)) {
 			let value;
@@ -79,7 +77,7 @@ class MapExtended extends Map {
 }
 
 /**
- * You can use [1] for arrays as "obj.array.1.prop" everything that can be placed in "[]".
+ * Use indexes "[1]" for arrays as "obj.array.1.prop" everything that can be placed in "[]".
  * @param iterableCollection collection of objects
  * @param propertyPath String
  * @returns {*[]} Array of properties values
@@ -235,12 +233,13 @@ function getCallerFunctionName() {
 }
 
 /**
- * no falsy check! (null = undefined = 0 = false)!
- * only own properties comparation for objects!
+ * Compares objects by properties, arrays for elemensts(including position), primitives.
+ * No falsy check! (null = undefined = 0 = false)!
+ * Only own properties comparation for objects!
  * RECURSION USED!
  * @param a {object||Primitive||Array}
  * @param b {object||Primitive||Array}
- * @returns {boolean}
+ * @returns {boolean} true if equal
  */
 function objectComparator(a, b) {
 	if (!a && !b && a === b) return true;

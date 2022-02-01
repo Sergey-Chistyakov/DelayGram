@@ -43,7 +43,7 @@ body {
     margin: 0;
     padding: 20px;
     height: 100%;
-    background: radial-gradient(circle, #f1f1f1, #e7e7e7,#dddddd,#d6d6d6,#cecece, #c7c7c7);
+    background: radial-gradient(circle, #f1f1f1, #e7e7e7, #dddddd, #d6d6d6, #cecece, #c7c7c7);
 }
 
 /*scrollbar universal*/
@@ -55,3 +55,4 @@ body {
     background-color: var(--color-elements-4);
     border-radius: 5px;
 }
+

@@ -1,0 +1,34 @@
+/*Delete drop zone*/
+div.delete-container {
+    display: none;
+    z-index: 1;
+    position: absolute;
+    background-color: var(--color-elements-3);
+    height: 235px;
+    width: 250px;
+    top: 120px;
+    left: 20px;
+}
+
+
+div.delete-container > div {
+    margin: 5px;
+    border: var(--main-text-color-light) solid var(--border-size);
+    border-radius: var(--border-radius);
+    height: calc(100% - 13px);
+    color: var(--main-text-color-light);
+
+    font-family: "Material Icons";
+    font-size: 240px;
+
+}
+
+div.delete-container > div[data-dragdrop-droppable-style=true] {
+    border-color: var(--color-elements-4);
+    color: var(--color-elements-4);
+}
+
+div.delete-container > div[data-dragdrop-droppable-style=false] {
+    border-color: var(--main-text-color-light);
+    color: var(--main-text-color-light);
+}

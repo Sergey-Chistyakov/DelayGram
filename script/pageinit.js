@@ -6,6 +6,15 @@ let mainDOMElements = {
 		picContainer: document.getElementById('pic-container-main'),
 		menu: document.getElementById("menu"),
 		galleriesList: document.getElementById('galleries-list'),
+		delete: {
+			container: document.getElementById('delete-container'),
+			zone: document.getElementById('delete-zone'),
+		},
+		header: {
+			container: document.getElementById('header'),
+			galleryName: document.getElementById('item-header-gallery-name'),
+			galleryDesc: document.getElementById('item-header-gallery-description'),
+		}
 	},
 	modal: {
 		screen: document.getElementById("modal"),
@@ -19,9 +28,10 @@ let mainDOMElements = {
 		nameInput: document.getElementById('gallery-name-input'),
 		descInput: document.getElementById('gallery-desc-input'),
 	},
-	templates:{
+	templates: {
 		selectableIcon: document.getElementById('selectable-icon'),
-		menuItem: document.getElementById('menu-element'),
+		menuElement: document.getElementById('menu-element'),
+		popupElement: document.getElementById('popup-element'),
 	}
 };
 
@@ -37,7 +47,7 @@ for (let iconCode of iconsArray) {
 // DOM control's classes ----------------------------------------------------------------------------------------------
 class ModalInputElementsControl {
 	constructor(elem) {
-		elem.onclick = this.onClick.bind(this);
+		elem.addEventListener('click', this.onClick.bind(this));
 	}
 
 	search() {
@@ -79,7 +89,7 @@ class ModalInputElementsControl {
 
 class MenuInputElementsControl {
 	constructor(elem) {
-		elem.onclick = this.onClick.bind(this);
+		elem.addEventListener('click', this.onClick.bind(this));
 	}
 
 	addImages() {
@@ -108,7 +118,7 @@ class MenuInputElementsControl {
 		mainDOMElements.newGallery.iconsList.firstElementChild.select();
 		mainDOMElements.newGallery.nameInput.value = null;
 		mainDOMElements.newGallery.descInput.value = null;
-		mainDOMElements.newGallery.screen.style.display="block";
+		mainDOMElements.newGallery.screen.style.display = "block";
 	}
 
 	onClick(event) {
@@ -121,25 +131,25 @@ class MenuInputElementsControl {
 
 class CreateGalleryModalInputElementsControl {
 	constructor(elem) {
-		elem.onclick = this.onClick.bind(this);
+		elem.addEventListener('click', this.onClick.bind(this));
 	}
 
+	// todo add validation of gallery name
 	confirm() {
 		let name = mainDOMElements.newGallery.nameInput.value.trim();
 		let desc = mainDOMElements.newGallery.descInput.value.trim();
 		let iconCode = mainDOMElements.newGallery.iconsList.selectedIcon;
-		if (!name || !iconCode) return;
-		galleriesCollection.setAndGet(name, GalleryHandleObject, {
+		if (!name || !iconCode || galleriesCollection.has(name)) {
+			return;
+		}
+		galleriesManager.addNewGallery({
 			name: name,
 			icon: iconCode,
 			description: desc,
 			imageURLarr: [],
-			createOrReplaceDBItem: true,
 			changed: new Date(),
 			created: new Date(),
 		});
-		galleriesManager.refreshGalleriesDomList();
-		galleriesCollection.lastAccessed.show();
 		mainDOMElements.newGallery.screen.style.display = 'none';
 	}
 

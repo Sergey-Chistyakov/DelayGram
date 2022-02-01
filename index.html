@@ -17,10 +17,18 @@
     <link type="text/css" rel="stylesheet" href="css/newgallery.css"/>
     <link type="text/css" rel="stylesheet" href="css/mainmenue.css"/>
     <link type="text/css" rel="stylesheet" href="css/logo.css"/>
+    <link type="text/css" rel="stylesheet" href="css/deletemodal.css"/>
     <!--CSS End-->
 
     <!--JS Begin-->
-    <script type="text/javascript" defer src="script/load.js"></script>
+    <script type="text/javascript" src="script/customelements/selectableicon.js"></script>
+    <script type="text/javascript" defer src="script/common.js"></script>
+    <script type="text/javascript" defer src="script/promisedindexdb.js"></script>
+    <script type="text/javascript" defer src="script/imgsearch.js"></script>
+    <script type="text/javascript" defer src="script/globalvariables.js"></script>
+    <script type="text/javascript" defer src="script/pageinit.js"></script>
+    <script type="text/javascript" defer src="script/dragdrop.js"></script>
+    <script type="text/javascript" defer src="script/imggalleries.js"></script>
     <!--JS End-->
 
     <!--Templates Begin-->
@@ -36,13 +44,21 @@
         </li>
         <!--        <link type="text/css" rel="stylesheet" href="css/customelements/selectableicons.css"/>-->
     </template>
+
+    <template id="popup-element">
+        <div id="container">
+            <div id="arrow-icon"></div>
+            <div id="description"></div>
+        </div>
+                <link type="text/css" rel="stylesheet" href="css/customelements/popupelement.css"/>
+    </template>
     <!--Templates End-->
 </head>
 <body>
-<!-- loading screen Begin -->
-<div class="loading-container" id="loading-container">
+<!-- loading screen -->
+<div id="loading-container" class="loading-container">
     <div class="loading-content">
-        <div class="loading-text">Loading</div>
+        <div class="loading-text">Delaying</div>
         <div class="loading-1 load">
             <div></div>
         </div>
@@ -60,8 +76,7 @@
         </div>
     </div>
 </div>
-<!-- loading screen End -->
-<!-- modal-container Begin -->
+<!-- modal-container -->
 <div id="modal" class="modal-container">
     <div class="modal-content">
         <div class="modal-grid-header">
@@ -126,15 +141,15 @@
         <div class="modal-grid-images" id="pic-container-modal"></div>
     </div>
 </div>
-<!-- modal-container End -->
-<!-- modal-new-gallery-screen Begin-->
+<!-- modal-new-gallery-screen -->
 <div id="create-new-gall-container" class="new-gallery-container">
     <div class="new-gall-content">
         <div class="item-new-gall-name">
             <input type="text" id="gallery-name-input" placeholder="Gallery name">
         </div>
         <div class="item-new-gall-desc">
-            <textarea id="gallery-desc-input" class="scrollbar" rows="5" placeholder="Gallery description"></textarea>
+            <textarea id="gallery-desc-input" class="scrollbar" rows="3" cols="23" wrap="hard" maxlength="150"
+                      placeholder="Gallery description"></textarea>
         </div>
         <div id="icons-container" class="item-new-gall-icon scrollbar">
         </div>
@@ -144,14 +159,19 @@
         </div>
     </div>
 </div>
-<!-- modal-new-gallery-screen End-->
-<!-- main-container Begin -->
+<!--Delete drop zone-->
+<div id="delete-container" class="delete-container">
+    <div id="delete-zone">
+        delete
+    </div>
+</div>
+<!-- main-container -->
 <div class="grid-container">
     <!-- header -->
     <div class="item-header" id="header">
-        <div>
-            <span style="text-align: center; font-size: 20px;">Gallery name</span>
-            <span style="text-align: center;">Gallery description</span>
+        <div class="scrollbar">
+            <span id="item-header-gallery-name" style="text-align: center; font-size: 20px;">Gallery name</span>
+            <span id="item-header-gallery-description" style="text-align: center;  line-height: 110%">Gallery description</span>
         </div>
     </div>
     <!--Logo-->
@@ -223,9 +243,8 @@
     </div>
     <!-- Footer -->
     <div class="item-footer" id="footer" style="color: black">
-        Sergey Chistyakov<br/>2021
+        Sergey Chistyakov<br/>2021-2022
     </div>
 </div>
-<!-- main-container End -->
 </body>
 </html>

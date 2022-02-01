@@ -28,16 +28,16 @@ async function syncronizedPromises(objArray) {
 }
 
 // loading js files via promises --------------------------------------------------------------------------------------
-let scriptArr = [];
 
 let jsArr = [
-	{name: 'script/common.js', order: 0, exeFunc: null},
-	{name: 'script/customelements/selectableicon.js', order: 0, exeFunc: null},
+	//{name: 'script/common.js', order: 0, exeFunc: null},
+	// {name: 'script/customelements/selectableicon.js', order: 0, exeFunc: null},
 	{name: 'script/promisedindexdb.js', order: 1, exeFunc: null},
 	{name: 'script/imgsearch.js', order: 1, exeFunc: null},
 	{name: 'script/globalvariables.js', order: 2, exeFunc: null},
 	{name: 'script/pageinit.js', order: 3, exeFunc: null},
-	{name: 'script/imggalleries.js', order: 4, exeFunc: null},
+	{name: 'script/dragdrop.js', order: 4, exeFunc: null},
+	{name: 'script/imggalleries.js', order: 5, exeFunc: null},
 ];
 
 for (let jsFile of jsArr) {
@@ -46,7 +46,7 @@ for (let jsFile of jsArr) {
 		script.onload = resolve();
 		script.onerror = reject();
 		script.src = jsFile.name;
-		setTimeout(()=>{document.head.appendChild(script);},1);
+		setTimeout(()=>{document.head.appendChild(script);},0);
 	};
 }
 

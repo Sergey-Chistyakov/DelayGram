@@ -1,6 +1,7 @@
 div.item-menu {
     background-color: var(--color-elements-1);
     border-radius: var(--border-radius);
+    position: relative;
 }
 
 div.item-menu > div {
@@ -42,4 +43,10 @@ div.item-menu ul > li > span {
     font-family: "Material Icons";
 }
 
+div.item-menu ul > li[data-dragdrop-droppable-style=true] {
+    background-color: var(--color-elements-4);
+}
 
+div.item-menu ul > li[data-dragdrop-droppable-style=false] {
+    background-color: inherit;
+}

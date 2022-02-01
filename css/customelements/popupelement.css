@@ -1,0 +1,97 @@
+/*General*/
+div.popup-container {
+    z-index: 10;
+    user-select: none;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+div.popup-container > div.popup-text {
+    z-index: 9;
+    padding: 2px;
+    /*border: var(--border-size) solid var(--color-elements-1);*/
+    border-radius: var(--border-radius);
+    /*background-color: rebeccapurple;*/
+}
+
+div.popup-container > div.popup-arrow {
+    height: 13px;
+    width: 13px;
+    /*border: var(--border-size) solid var(--color-elements-1);*/
+    border-radius: 3px;
+    /*background-color: var(--color-elements-1);*/
+}
+
+/*composition*/
+div.popup-container[side="right"] {
+    top: 0;
+    left: calc(100% + 15px);
+    flex-direction: row;
+}
+
+div.popup-container[side="left"] {
+    top: 0;
+    flex-direction: row;
+    right: calc(100% + 15px);
+}
+
+div.popup-container[side="bottom"] {
+    left: 0;
+    top: calc(100% + 15px);
+    flex-direction: column;
+}
+
+div.popup-container[side="top"] {
+    left: 0;
+    bottom: calc(100% + 15px);
+    flex-direction: column;
+}
+
+/*text*/
+div.popup-container[side="right"] > div.popup-text {
+    position: absolute;
+    left: 0;
+}
+
+div.popup-container[side="left"] > div.popup-text {
+    position: absolute;
+    right: 0;
+}
+
+div.popup-container[side="bottom"] > div.popup-text {
+    position: absolute;
+    top: 0;
+}
+
+div.popup-container[side="top"] > div.popup-text {
+    position: absolute;
+    bottom: 0;
+}
+
+/*Arrows*/
+div.popup-container[side="right"] > div.popup-arrow {
+    position: absolute;
+    left: 0;
+    transform: translate(-9px) rotate(45deg);
+}
+
+div.popup-container[side="left"] > div.popup-arrow {
+    position: absolute;
+    right: 0;
+    transform: translateX(9px) rotate(45deg);
+}
+
+div.popup-container[side="top"] > div.popup-arrow {
+    position: absolute;
+    bottom: 0;
+    transform: translateY(9px) rotate(45deg);
+}
+
+div.popup-container[side="bottom"] > div.popup-arrow {
+    position: absolute;
+    top: 0;
+    transform: translateY(-9px) rotate(45deg);
+}

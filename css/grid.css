@@ -4,14 +4,16 @@
             "_logo header"
             "_menu main"
             "_galeries main"
-            "footer main";
+            "footer footer";
     grid-gap: 5px;
     margin-right: 20px;
     grid-template-columns: 250px calc(100vw - 295px);
-    grid-template-rows: 95px 235px calc(100vh - 40px - 15px - 95px - 235px - 32px) 32px;
+    grid-template-rows: 95px 235px minmax(55px, calc(100vh - 40px - 15px - 95px - 235px - 32px)) 32px;
     min-height: calc(100vh - 40px);
     max-height: calc(100vh - 40px);
     position: fixed;
+    overflow: hidden;
+    min-width: 600px;
 }
 
 .grid-container > div {
@@ -36,6 +38,8 @@
     border: var(--main-text-color-light) solid var(--border-size);
     border-radius: var(--border-radius);
     flex: 1;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .item-header > div> :first-child{
@@ -48,6 +52,10 @@
 
 .item-galleries {
     grid-area: _galeries;
+}
+
+.item-galleries > div {
+    overflow-x: hidden;
 }
 
 .item-galleries::-webkit-scrollbar {

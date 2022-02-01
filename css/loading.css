@@ -23,6 +23,7 @@
 }
 
 .loading-text {
+    font-family: Satisfy;
     z-index: 40;
     position: absolute;
     top: 50%;
